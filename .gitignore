@@ -31,5 +31,11 @@
 *.out
 *.app
 
-/cmake-build-debug/
-/cmake-build-release/
+*.tlog
+*.pdb
+*.log
+*.iobj
+*.ipdb
+*.recipe
+*.ilk
+*.idb
