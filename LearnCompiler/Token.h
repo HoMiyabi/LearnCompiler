@@ -15,9 +15,8 @@ public:
     static std::unordered_map<std::string, TokenKind> strToKeywordKind;
 
     Token();
-    Token(TokenKind kind, std::variant<std::string, int> value);
-
     explicit Token(TokenKind kind);
+    Token(TokenKind kind, std::variant<std::string, int> value);
 
     std::string ToString() const;
 };

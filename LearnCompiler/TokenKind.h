@@ -7,7 +7,7 @@ enum class TokenKind
 #include "TokenKind.def.h"
 };
 
-inline std::string_view TokenKindToString(TokenKind value){
+inline std::string_view ToString(TokenKind value){
     switch(value)
     {
 #define TOKEN_KIND_ENUM(x) case TokenKind::x: return #x;

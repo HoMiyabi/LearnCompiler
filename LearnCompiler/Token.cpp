@@ -19,9 +19,7 @@ Token::Token(const TokenKind kind, std::variant<std::string, int> value):
 {
 }
 
-Token::Token()
-{
-}
+Token::Token() = default;
 
 Token::Token(TokenKind kind): kind(kind)
 {
@@ -30,7 +28,7 @@ Token::Token(TokenKind kind): kind(kind)
 std::string Token::ToString() const
 {
     std::string text;
-    text += TokenKindToString(kind);
+    text += ::ToString(kind);
     if (kind == TokenKind::Int)
     {
         text += ' ';

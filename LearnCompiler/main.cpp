@@ -5,8 +5,8 @@
 
 int main(int argc, char* argv[])
 {
-    Tokenizer tker("123 abc");
-    Token tk{};
+    Tokenizer tker("var a = 1 var bbbbb = 2");
+    Token tk;
     while (tker.GetToken(tk))
     {
         std::cout << tk.ToString() << '\n';
