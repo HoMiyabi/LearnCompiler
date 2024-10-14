@@ -4,13 +4,7 @@
 #include <string>
 #include <variant>
 
-enum class TokenKind
-{
-    Begin, End, If, Then, While, Do, Var, Procedure, Call,
-    Add, Sub, Mul, Div, Equal, NotEqual, Assign,
-    Int,
-    Identifier
-};
+enum class TokenKind;
 
 class Token
 {
@@ -20,7 +14,10 @@ public:
 
     static std::unordered_map<std::string, TokenKind> strToKeywordKind;
 
-    Token(TokenKind kind, std::variant<std::string, int>&& value);
+    Token();
+    Token(TokenKind kind, std::variant<std::string, int> value);
 
     explicit Token(TokenKind kind);
+
+    std::string ToString() const;
 };

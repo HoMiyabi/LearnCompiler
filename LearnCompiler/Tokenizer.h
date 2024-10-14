@@ -2,7 +2,7 @@
 #include <string>
 #include <unordered_set>
 
-#include "Token.h"
+class Token;
 
 class Tokenizer
 {
@@ -12,8 +12,11 @@ class Tokenizer
     std::unordered_set<std::string> identifiers;
     std::unordered_set<int> consts;
 
-    explicit Tokenizer(const std::string& text);
+public:
+    explicit Tokenizer(std::string text);
     bool GetToken(Token& token);
+
+private:
     Token HandleKeywordOrIdentifier();
     Token HandleLiteral();
 };

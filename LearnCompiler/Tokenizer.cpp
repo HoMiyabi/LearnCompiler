@@ -1,7 +1,10 @@
 ﻿#include "Tokenizer.h"
+#include "Token.h"
+#include "TokenKind.h"
 
-Tokenizer::Tokenizer(const std::string& text): text(text)
-{}
+Tokenizer::Tokenizer(std::string text): text(std::move(text))
+{
+}
 
 bool Tokenizer::GetToken(Token& token)
 {
