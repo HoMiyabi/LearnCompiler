@@ -6,7 +6,7 @@ class Token;
 
 class Tokenizer
 {
-    int i = 0;
+    std::string::iterator it;
     std::string text;
 
     std::unordered_set<std::string> identifiers;
@@ -20,8 +20,4 @@ public:
 private:
     Token HandleKeywordOrIdentifier();
     Token HandleLiteral();
-    bool IsEnd() const;
-    void MoveNext();
-    void MovePrev();
-    char Current() const;
 };

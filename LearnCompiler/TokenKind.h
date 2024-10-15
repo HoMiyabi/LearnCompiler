@@ -12,6 +12,6 @@ inline std::string_view ToString(TokenKind value){
     {
 #define ENUM(x) case TokenKind::x: return #x;
 #include "TokenKind.def.h"
-    default: return "Unknown";
     }
+    return "Unknown";
 }
