@@ -55,6 +55,12 @@ bool Tokenizer::GetToken(Token& token)
             token = Token(TokenKind::Assign);
             return true;
         }
+        else if (text[i] == ';')
+        {
+            i++;
+            token = Token(TokenKind::Semicolon);
+            return true;
+        }
     }
     return false;
 }
