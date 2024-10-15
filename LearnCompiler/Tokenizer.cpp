@@ -9,15 +9,18 @@ Tokenizer::Tokenizer(std::string text): text(std::move(text))
 
 bool Tokenizer::GetToken(Token& token)
 {
-    while (it != text.end())
+    while (true)
     {
+        if (it == text.end())
+        {
+            return false;
+        }
         if (!isspace(*it))
         {
             break;
         }
         ++it;
     }
-    if (it == text.end()) return false;
 
     if (isalpha(*it))
     {
