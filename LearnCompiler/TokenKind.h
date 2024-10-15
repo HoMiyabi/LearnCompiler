@@ -3,14 +3,14 @@
 
 enum class TokenKind
 {
-#define TOKEN_KIND_ENUM(x) x,
+#define ENUM(x) x,
 #include "TokenKind.def.h"
 };
 
 inline std::string_view ToString(TokenKind value){
     switch(value)
     {
-#define TOKEN_KIND_ENUM(x) case TokenKind::x: return #x;
+#define ENUM(x) case TokenKind::x: return #x;
 #include "TokenKind.def.h"
     default: return "Unknown";
     }

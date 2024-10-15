@@ -8,75 +8,149 @@ Tokenizer::Tokenizer(std::string text): text(std::move(text))
 
 bool Tokenizer::GetToken(Token& token)
 {
-    const auto n = text.size();
-    while (i < n)
+    char ch = 0;
+    while (!IsEnd())
     {
-        if (isspace(text[i]))
+        ch = Current();
+        if (!isspace(ch))
         {
-            i++;
+            break;
         }
-        else if (isalpha(text[i]))
-        {
-            token = HandleKeywordOrIdentifier();
-            return true;
-        }
-        else if (isdigit(text[i]))
-        {
-            token = HandleLiteral();
-            return true;
-        }
-        else if (text[i] == '+')
-        {
-            i++;
-            token = Token(TokenKind::Add);
-            return true;
-        }
-        else if (text[i] == '-')
-        {
-            i++;
-            token = Token(TokenKind::Sub);
-            return true;
-        }
-        else if (text[i] == '*')
-        {
-            i++;
-            token = Token(TokenKind::Mul);
-            return true;
-        }
-        else if (text[i] == '/')
-        {
-            i++;
-            token = Token(TokenKind::Div);
-            return true;
-        }
-        else if (text[i] == '=')
-        {
-            i++;
-            token = Token(TokenKind::Assign);
-            return true;
-        }
-        else if (text[i] == ';')
-        {
-            i++;
-            token = Token(TokenKind::Semicolon);
-            return true;
-        }
+        MoveNext();
     }
+    if (IsEnd()) return false;
+
+    if (isalpha(ch))
+    {
+        token = HandleKeywordOrIdentifier();
+        return true;
+    }
+    if (isdigit(ch))
+    {
+        token = HandleLiteral();
+        return true;
+    }
+    if (ch == '+')
+    {
+        MoveNext();
+        token = Token(TokenKind::Add);
+        return true;
+    }
+    if (ch == '-')
+    {
+        MoveNext();
+        token = Token(TokenKind::Sub);
+        return true;
+    }
+    if (ch == '*')
+    {
+        MoveNext();
+        token = Token(TokenKind::Mul);
+        return true;
+    }
+    if (ch == '/')
+    {
+        MoveNext();
+        token = Token(TokenKind::Div);
+        return true;
+    }
+    if (ch == ':')
+    {
+        MoveNext();
+        if (IsEnd())
+        {
+            message = "非预期的符号";
+            message += ch;
+            return false;
+        }
+        if (Current() != '=')
+        {
+            message = "非预期的符号";
+            message += ch;
+            message += Current();
+            MovePrev();
+            return false;
+        }
+        MoveNext();
+        token = Token(TokenKind::Assign);
+        return true;
+    }
+    if (ch == '=')
+    {
+        MoveNext();
+        token = Token(TokenKind::Equal);
+        return true;
+    }
+    if (ch == '<')
+    {
+        MoveNext();
+        if (IsEnd() || Current() != '=')
+        {
+            token = Token(TokenKind::Less);
+            return true;
+        }
+        MoveNext();
+        token = Token(TokenKind::LessOrEqual);
+        return true;
+    }
+    if (ch == '>')
+    {
+        MoveNext();
+        if (IsEnd() || Current() != '=')
+        {
+            token = Token(TokenKind::Greater);
+            return true;
+        }
+        MoveNext();
+        token = Token(TokenKind::GreaterOrEqual);
+        return true;
+    }
+    if (ch == '(')
+    {
+        MoveNext();
+        token = Token(TokenKind::LParen);
+        return true;
+    }
+    if (ch == ')')
+    {
+        MoveNext();
+        token = Token(TokenKind::RParen);
+        return true;
+    }
+    if (ch == '{')
+    {
+        MoveNext();
+        token = Token(TokenKind::LBrace);
+        return true;
+    }
+    if (ch == '}')
+    {
+        MoveNext();
+        token = Token(TokenKind::RBrace);
+        return true;
+    }
+    if (ch == ';')
+    {
+        MoveNext();
+        token = Token(TokenKind::Semicolon);
+        return true;
+    }
+    message = "非预期的符号";
+    message += ch;
     return false;
 }
 
 Token Tokenizer::HandleKeywordOrIdentifier()
 {
-    int n = text.size();
     std::string tokenStr;
     do
     {
-        tokenStr.push_back(text[i]);
-        i++;
-    } while (i < n && isalnum(text[i]));
+        tokenStr.push_back(Current());
+        MoveNext();
+    } while (!IsEnd() && isalnum(Current()));
 
     auto it = Token::strToKeywordKind.find(tokenStr);
-    if (it != Token::strToKeywordKind.end())
+    if (Token::strToKeywordKind.contains(tokenStr))
     {
         return Token(it->second);
     }
@@ -87,16 +161,35 @@ Token Tokenizer::HandleKeywordOrIdentifier()
 
 Token Tokenizer::HandleLiteral()
 {
-    int n = text.size();
     std::string tokenStr;
     do
     {
-        tokenStr.push_back(text[i]);
-        i++;
-    } while (i < n && isdigit(text[i]));
+        tokenStr.push_back(Current());
+        MoveNext();
+    } while (!IsEnd() && isdigit(Current()));
 
     int value = std::stoi(tokenStr);
 
     consts.insert(value);
     return Token(TokenKind::Int, value);
+}
+
+bool Tokenizer::IsEnd() const
+{
+    return i == text.size();
+}
+
+void Tokenizer::MoveNext()
+{
+    i++;
+}
+
+void Tokenizer::MovePrev()
+{
+    i--;
+}
+
+char Tokenizer::Current() const
+{
+    return text[i];
 }

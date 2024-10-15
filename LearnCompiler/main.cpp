@@ -25,5 +25,9 @@ int main(int argc, char* argv[])
     {
         std::cout << tk.ToString() << '\n';
     }
+    if (!tokenizer.message.empty())
+    {
+        std::cout << tokenizer.message << '\n';
+    }
     return 0;
 }

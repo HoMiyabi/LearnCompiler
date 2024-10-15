@@ -1,32 +1,40 @@
-#ifndef TOKEN_KIND_ENUM
-#define TOKEN_KIND_ENUM(...)
+#ifndef ENUM
+#define ENUM(...)
 #endif
 
-TOKEN_KIND_ENUM(Begin)
-TOKEN_KIND_ENUM(End)
-TOKEN_KIND_ENUM(If)
-TOKEN_KIND_ENUM(Then)
-TOKEN_KIND_ENUM(While)
-TOKEN_KIND_ENUM(Do)
-TOKEN_KIND_ENUM(Var)
-TOKEN_KIND_ENUM(Procedure)
-TOKEN_KIND_ENUM(Call)
+ENUM(Begin)
+ENUM(End)
+ENUM(If)
+ENUM(Then)
+ENUM(While)
+ENUM(Do)
+ENUM(Var)
+ENUM(Procedure)
+ENUM(Call)
+ENUM(Const)
+ENUM(Odd)
 
-TOKEN_KIND_ENUM(Int)
-TOKEN_KIND_ENUM(Identifier)
+ENUM(Int)
+ENUM(Identifier)
 
-TOKEN_KIND_ENUM(Add)
-TOKEN_KIND_ENUM(Sub)
-TOKEN_KIND_ENUM(Mul)
-TOKEN_KIND_ENUM(Div)
-TOKEN_KIND_ENUM(Equal)
-TOKEN_KIND_ENUM(NotEqual)
-TOKEN_KIND_ENUM(Assign)
-TOKEN_KIND_ENUM(LParen)
-TOKEN_KIND_ENUM(RParen)
-TOKEN_KIND_ENUM(LBrace)
-TOKEN_KIND_ENUM(RBrace)
-TOKEN_KIND_ENUM(Semicolon)
+ENUM(Add)
+ENUM(Sub)
+ENUM(Mul)
+ENUM(Div)
 
+ENUM(Assign)
 
-#undef TOKEN_KIND_ENUM
+ENUM(Equal)
+ENUM(Less)
+ENUM(LessOrEqual)
+ENUM(Greater)
+ENUM(GreaterOrEqual)
+
+ENUM(LParen)
+ENUM(RParen)
+ENUM(LBrace)
+ENUM(RBrace)
+ENUM(Semicolon)
+ENUM(Comma)
+
+#undef ENUM
