@@ -26,9 +26,9 @@ ENUM(Assign)
 
 ENUM(Equal)
 ENUM(Less)
-ENUM(LessOrEqual)
+ENUM(LessEqual)
 ENUM(Greater)
-ENUM(GreaterOrEqual)
+ENUM(GreaterEqual)
 
 ENUM(LParen)
 ENUM(RParen)

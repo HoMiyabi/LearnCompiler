@@ -94,7 +94,7 @@ bool Tokenizer::GetToken(Token& token)
             return true;
         }
         ++it;
-        token = Token(TokenKind::LessOrEqual);
+        token = Token(TokenKind::LessEqual);
         return true;
     }
     if (*it == '>')
@@ -106,7 +106,7 @@ bool Tokenizer::GetToken(Token& token)
             return true;
         }
         ++it;
-        token = Token(TokenKind::GreaterOrEqual);
+        token = Token(TokenKind::GreaterEqual);
         return true;
     }
     if (*it == '(')

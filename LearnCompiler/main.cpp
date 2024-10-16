@@ -17,13 +17,13 @@ int main(int argc, char* argv[])
 {
     if (argc != 2) return 0;
     auto text = ReadFile(argv[1]);
-    std::cout << text << '\n';
+    // std::cout << text << '\n';
 
     Tokenizer tokenizer(std::move(text));
-    Token tk;
-    while (tokenizer.GetToken(tk))
+    Token token;
+    while (tokenizer.GetToken(token))
     {
-        std::cout << tk.ToString() << '\n';
+        std::cout << token.ToString() << '\n';
     }
     if (!tokenizer.message.empty())
     {
