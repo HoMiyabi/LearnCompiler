@@ -1,4 +1,6 @@
 ﻿#include "Tokenizer.h"
+
+#include "CharUtils.h"
 #include "Token.h"
 #include "TokenKind.h"
 
@@ -15,19 +17,19 @@ bool Tokenizer::GetToken(Token& token)
         {
             return false;
         }
-        if (!isspace(*it))
+        if (!IsSpace(*it))
         {
             break;
         }
         ++it;
     }
 
-    if (isalpha(*it))
+    if (IsLetter(*it))
     {
         token = HandleKeywordOrIdentifier();
         return true;
     }
-    if (isdigit(*it))
+    if (IsDigit(*it))
     {
         token = HandleLiteral();
         return true;
@@ -151,7 +153,7 @@ Token Tokenizer::HandleKeywordOrIdentifier()
     {
         tokenStr.push_back(*it);
         ++it;
-    } while (it != text.end() && isalnum(*it));
+    } while (it != text.end() && IsLetterOrDigit(*it));
 
     if (const auto its = Token::strToKeywordKind.find(tokenStr); its != Token::strToKeywordKind.end())
     {
@@ -169,7 +171,7 @@ Token Tokenizer::HandleLiteral()
     {
         tokenStr.push_back(*it);
         ++it;
-    } while (it != text.end() && isdigit(*it));
+    } while (it != text.end() && IsDigit(*it));
 
     int value = std::stoi(tokenStr);
 
