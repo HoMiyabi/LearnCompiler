@@ -29,5 +29,6 @@ int main(int argc, char* argv[])
     {
         std::cout << tokenizer.message << '\n';
     }
+
     return 0;
 }
