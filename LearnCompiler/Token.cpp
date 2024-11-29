@@ -3,15 +3,8 @@
 
 std::unordered_map<std::string, TokenKind> Token::strToKeywordKind
 {
-    {"begin", TokenKind::Begin},
-    {"end", TokenKind::End},
-    {"if", TokenKind::If},
-    {"then", TokenKind::Then},
-    {"while", TokenKind::While},
-    {"do", TokenKind::Do},
-    {"var", TokenKind::Var},
-    {"procedure", TokenKind::Procedure},
-    {"call", TokenKind::Call}
+#define TOKEN_KEYWORD(X) {#X, TokenKind::kw_##X},
+#include "TokenKind.def.h"
 };
 
 Token::Token(const TokenKind kind, std::variant<std::string, int> value):

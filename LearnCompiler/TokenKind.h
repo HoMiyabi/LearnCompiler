@@ -1,17 +1,14 @@
 #pragma once
 #include <string_view>
 
-enum class TokenKind
+enum TokenKind
 {
-#define ENUM(x) x,
+#define TOKEN_KEYWORD(X) kw_##X,
 #include "TokenKind.def.h"
 };
 
-inline std::string_view ToString(TokenKind value){
-    switch(value)
-    {
-#define ENUM(x) case TokenKind::x: return #x;
+enum TokenKeywordKind
+{
+#define TOKEN_KEYWORD(X) kw_##X,
 #include "TokenKind.def.h"
-    }
-    return "Unknown";
-}
+};

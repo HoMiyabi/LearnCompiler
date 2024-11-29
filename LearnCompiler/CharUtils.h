@@ -19,3 +19,12 @@ inline bool IsLetterOrDigit(char ch)
 {
     return IsLetter(ch) || IsDigit(ch);
 }
+
+inline bool IsSinglePunctuator(char ch)
+{
+    switch (ch)
+    {
+#define TOKEN_PUNCTUATOR
+#include "TokenKind.def.h"
+    }
+}

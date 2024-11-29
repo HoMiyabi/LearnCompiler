@@ -1,40 +1,48 @@
-#ifndef ENUM
-#define ENUM(...)
+#ifndef TOKEN_KEYWORD
+#define TOKEN_KEYWORD(X)
 #endif
 
-ENUM(Begin)
-ENUM(End)
-ENUM(If)
-ENUM(Then)
-ENUM(While)
-ENUM(Do)
-ENUM(Var)
-ENUM(Procedure)
-ENUM(Call)
-ENUM(Const)
-ENUM(Odd)
+#ifndef TOKEN_PUNCTUATOR
+#define TOKEN_PUNCTUATOR(X, Y)
+#endif
 
-ENUM(Int)
-ENUM(Identifier)
+TOKEN_KEYWORD(begin)
+TOKEN_KEYWORD(end)
 
-ENUM(Add)
-ENUM(Sub)
-ENUM(Mul)
-ENUM(Div)
+TOKEN_KEYWORD(if)
+TOKEN_KEYWORD(then)
+TOKEN_KEYWORD(else)
 
-ENUM(Assign)
+TOKEN_KEYWORD(while)
+TOKEN_KEYWORD(do)
 
-ENUM(Equal)
-ENUM(Less)
-ENUM(LessEqual)
-ENUM(Greater)
-ENUM(GreaterEqual)
+TOKEN_KEYWORD(var)
+TOKEN_KEYWORD(procedure)
+TOKEN_KEYWORD(call)
+TOKEN_KEYWORD(const)
+TOKEN_KEYWORD(odd)
+TOKEN_KEYWORD(read)
+TOKEN_KEYWORD(write)
 
-ENUM(LParen)
-ENUM(RParen)
-ENUM(LBrace)
-ENUM(RBrace)
-ENUM(Semicolon)
-ENUM(Comma)
+TOKEN_PUNCTUATOR(plus, "+")
+TOKEN_PUNCTUATOR(minus, "-")
+TOKEN_PUNCTUATOR(star, "*")
+TOKEN_PUNCTUATOR(slash, "/")
 
-#undef ENUM
+TOKEN_PUNCTUATOR(equal, "=")
+TOKEN_PUNCTUATOR(less, "<")
+TOKEN_PUNCTUATOR(lessequal, "<=")
+TOKEN_PUNCTUATOR(greater, ">")
+TOKEN_PUNCTUATOR(greaterequal, ">=")
+
+TOKEN_PUNCTUATOR(l_paren, "(")
+TOKEN_PUNCTUATOR(r_paren, ")")
+TOKEN_PUNCTUATOR(l_brace, "{")
+TOKEN_PUNCTUATOR(r_brace, "}")
+
+TOKEN_PUNCTUATOR(semi, ";")
+TOKEN_PUNCTUATOR(comma, ",")
+TOKEN_PUNCTUATOR(colonequal, ":=")
+
+#undef TOKEN_KEYWORD
+#undef TOKEN_PUNCTUATOR
