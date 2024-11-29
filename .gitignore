@@ -41,3 +41,4 @@
 *.idb
 
 .vs/
+*.vcxproj.user
