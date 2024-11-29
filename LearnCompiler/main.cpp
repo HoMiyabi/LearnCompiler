@@ -1,17 +1,8 @@
-#include <fstream>
 #include <iostream>
-#include <sstream>
 
+#include "FileUtils.h"
 #include "Token.h"
 #include "Tokenizer.h"
-
-std::string ReadFile(std::string_view fileName)
-{
-    std::ifstream ifs{fileName.data()};
-    std::ostringstream ss;
-    ss << ifs.rdbuf();
-    return ss.str();
-}
 
 int main(int argc, char* argv[])
 {

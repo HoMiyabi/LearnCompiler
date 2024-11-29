@@ -2,7 +2,12 @@
 
 inline bool IsSpace(const char ch)
 {
-    return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r';
+    return ch == ' ' || ch == '\t' || ch == '\n';
+}
+
+inline bool IsNewline(const char ch)
+{
+    return ch == '\n';
 }
 
 inline bool IsDigit(const char ch)

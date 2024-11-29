@@ -163,12 +163,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Token.cpp" />
-    <ClCompile Include="Tokenizer.cpp" />
-    <ClCompile Include="TokenKind.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CharUtils.h" />
+    <ClInclude Include="FileUtils.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="Tokenizer.h" />
     <ClInclude Include="TokenKind.h" />
