@@ -39,3 +39,5 @@
 *.recipe
 *.ilk
 *.idb
+
+.vs/
