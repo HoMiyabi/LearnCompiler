@@ -1,30 +1,21 @@
 ﻿#pragma once
 
-inline bool IsSpace(char ch)
+inline bool IsSpace(const char ch)
 {
     return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r';
 }
 
-inline bool IsDigit(char ch)
+inline bool IsDigit(const char ch)
 {
     return ch >= '0' && ch <= '9';
 }
 
-inline bool IsLetter(char ch)
+inline bool IsLetter(const char ch)
 {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
 }
 
-inline bool IsLetterOrDigit(char ch)
+inline bool IsLetterOrDigit(const char ch)
 {
     return IsLetter(ch) || IsDigit(ch);
-}
-
-inline bool IsSinglePunctuator(char ch)
-{
-    switch (ch)
-    {
-#define TOKEN_PUNCTUATOR
-#include "TokenKind.def.h"
-    }
 }

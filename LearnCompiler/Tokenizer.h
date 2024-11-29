@@ -2,7 +2,9 @@
 #include <string>
 #include <unordered_set>
 
-class Token;
+#include "CharUtils.h"
+#include "Token.h"
+#include "TokenKind.h"
 
 class Tokenizer
 {
@@ -19,5 +21,32 @@ public:
 
 private:
     Token HandleKeywordOrIdentifier();
-    Token HandleLiteral();
+
+    Token HandleLiteral()
+    {
+        std::string tokenStr;
+        do
+        {
+            tokenStr.push_back(*it);
+            ++it;
+        } while (it != text.end() && IsDigit(*it));
+
+        int value = std::stoi(tokenStr);
+
+        consts.insert(value);
+        return {TokenKind::Int, value};
+    }
+
+    Token HandlePunctuator()
+    {
+        std::string tokenStr;
+        do
+        {
+            tokenStr.push_back(*it);
+            ++it;
+        } while (it != text.end() && IsPunctuator(*it));
+
+        TokenKind tokenKind = spellingToTokenKind.at(tokenStr);
+        return {tokenKind, tokenStr};
+    }
 };

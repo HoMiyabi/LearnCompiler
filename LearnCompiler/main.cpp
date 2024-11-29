@@ -15,7 +15,11 @@ std::string ReadFile(std::string_view fileName)
 
 int main(int argc, char* argv[])
 {
-    if (argc != 2) return 0;
+    if (argc != 2)
+    {
+        std::cout << "请输入文件名\n";
+        return 0;
+    }
     auto text = ReadFile(argv[1]);
     // std::cout << text << '\n';
 

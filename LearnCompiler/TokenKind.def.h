@@ -1,48 +1,55 @@
+#ifndef TOKEN
+#define TOKEN(Name)
+#endif
+
 #ifndef TOKEN_KEYWORD
-#define TOKEN_KEYWORD(X)
+#define TOKEN_KEYWORD(Name, Spelling)
 #endif
 
 #ifndef TOKEN_PUNCTUATOR
-#define TOKEN_PUNCTUATOR(X, Y)
+#define TOKEN_PUNCTUATOR(Name, Spelling)
 #endif
 
-TOKEN_KEYWORD(begin)
-TOKEN_KEYWORD(end)
+TOKEN(Identifier)
+TOKEN(Int)
+TOKEN_KEYWORD(Begin, "begin")
+TOKEN_KEYWORD(End, "end")
 
-TOKEN_KEYWORD(if)
-TOKEN_KEYWORD(then)
-TOKEN_KEYWORD(else)
+TOKEN_KEYWORD(If, "if")
+TOKEN_KEYWORD(Then, "then")
+TOKEN_KEYWORD(Else, "else")
 
-TOKEN_KEYWORD(while)
-TOKEN_KEYWORD(do)
+TOKEN_KEYWORD(While, "while")
+TOKEN_KEYWORD(Do, "do")
 
-TOKEN_KEYWORD(var)
-TOKEN_KEYWORD(procedure)
-TOKEN_KEYWORD(call)
-TOKEN_KEYWORD(const)
-TOKEN_KEYWORD(odd)
-TOKEN_KEYWORD(read)
-TOKEN_KEYWORD(write)
+TOKEN_KEYWORD(Var, "var")
+TOKEN_KEYWORD(Procedure, "procedure")
+TOKEN_KEYWORD(Call, "call")
+TOKEN_KEYWORD(Const, "const")
+TOKEN_KEYWORD(Odd, "odd")
+TOKEN_KEYWORD(Read, "read")
+TOKEN_KEYWORD(Write, "write")
 
-TOKEN_PUNCTUATOR(plus, "+")
-TOKEN_PUNCTUATOR(minus, "-")
-TOKEN_PUNCTUATOR(star, "*")
-TOKEN_PUNCTUATOR(slash, "/")
+TOKEN_PUNCTUATOR(Plus, "+")
+TOKEN_PUNCTUATOR(Minus, "-")
+TOKEN_PUNCTUATOR(Star, "*")
+TOKEN_PUNCTUATOR(Slash, "/")
 
-TOKEN_PUNCTUATOR(equal, "=")
-TOKEN_PUNCTUATOR(less, "<")
-TOKEN_PUNCTUATOR(lessequal, "<=")
-TOKEN_PUNCTUATOR(greater, ">")
-TOKEN_PUNCTUATOR(greaterequal, ">=")
+TOKEN_PUNCTUATOR(Equal, "=")
+TOKEN_PUNCTUATOR(Less, "<")
+TOKEN_PUNCTUATOR(LessEqual, "<=")
+TOKEN_PUNCTUATOR(Greater, ">")
+TOKEN_PUNCTUATOR(GreaterEqual, ">=")
 
-TOKEN_PUNCTUATOR(l_paren, "(")
-TOKEN_PUNCTUATOR(r_paren, ")")
-TOKEN_PUNCTUATOR(l_brace, "{")
-TOKEN_PUNCTUATOR(r_brace, "}")
+TOKEN_PUNCTUATOR(LParen, "(")
+TOKEN_PUNCTUATOR(RParen, ")")
+TOKEN_PUNCTUATOR(LBrace, "{")
+TOKEN_PUNCTUATOR(RBrace, "}")
 
-TOKEN_PUNCTUATOR(semi, ";")
-TOKEN_PUNCTUATOR(comma, ",")
-TOKEN_PUNCTUATOR(colonequal, ":=")
+TOKEN_PUNCTUATOR(Semi, ";")
+TOKEN_PUNCTUATOR(Comma, ",")
+TOKEN_PUNCTUATOR(ColonEqual, ":=")
 
+#undef TOKEN
 #undef TOKEN_KEYWORD
 #undef TOKEN_PUNCTUATOR
