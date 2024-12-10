@@ -52,7 +52,7 @@ public:
             token = HandlePunctuator();
             return true;
         }
-        message = "非预期的字符'" + std::string{Current()} + "'位于" + std::to_string(row) + "行" + std::to_string(column) + "列";
+        message = "[错误] 非预期的字符'" + std::string{Current()} + "'位于" + std::to_string(row) + "行" + std::to_string(column) + "列";
         return false;
     }
 
@@ -71,7 +71,7 @@ private:
         if (IsNewline(*it))
         {
             ++row;
-            column = 0;
+            column = 1;
         }
         ++it;
     }
