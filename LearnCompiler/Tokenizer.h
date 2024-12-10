@@ -45,7 +45,7 @@ public:
         {
             return HandleLiteral(token);
         }
-        if (punctuators.contains(Current()))
+        if (startingPunctuators.contains(Current()))
         {
             return HandlePunctuator(token);
         }

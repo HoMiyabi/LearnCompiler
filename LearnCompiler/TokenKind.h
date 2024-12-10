@@ -87,7 +87,7 @@ inline const std::unordered_map<std::string_view, TokenKind> punctuatorSpellingT
     {":=", TokenKind::ColonEqual},
 };
 
-inline const std::unordered_set<char> punctuators
+inline const std::unordered_set<char> startingPunctuators
 {
     '+',
     '-',
