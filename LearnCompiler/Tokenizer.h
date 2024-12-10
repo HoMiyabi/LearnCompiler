@@ -49,7 +49,7 @@ public:
         {
             return HandlePunctuator(token);
         }
-        message = "[错误] 非预期的字符" + std::string{Current()} + "位于" + std::to_string(row) + "行" + std::to_string(column) + "列";
+        message = GetErrorPrefix() + "非预期的字符" + std::string{Current()};
         return false;
     }
 
@@ -76,6 +76,16 @@ private:
     bool IsEnd() const
     {
         return it == text.end();
+    }
+
+    std::string GetFileLocation() const
+    {
+        return std::to_string(row) + "行" + std::to_string(column) + "列";
+    }
+
+    std::string GetErrorPrefix() const
+    {
+        return "[错误] 位于" + GetFileLocation() + ": ";
     }
 
     bool HandleKeywordOrIdentifier(Token& token)
@@ -115,12 +125,12 @@ private:
         }
         catch (std::invalid_argument&)
         {
-            message = "[错误] 数字" + tokenStr + "无法被解析";
+            message = GetErrorPrefix() + "数字" + tokenStr + "无法被解析";
             return false;
         }
         catch (std::out_of_range&)
         {
-            message = "[错误] 数字" + tokenStr + "超出范围";
+            message = GetErrorPrefix() + "数字" + tokenStr + "超出范围";
             return false;
         }
         consts.insert(value);
@@ -142,7 +152,7 @@ private:
         auto it1 = spellingToTokenKind.find(tokenStr);
         if (it1 == spellingToTokenKind.end())
         {
-            message = "[错误] 标点符" + tokenStr + "未定义";
+            message = GetErrorPrefix() + "标点符" + tokenStr + "未定义";
             return false;
         }
 
