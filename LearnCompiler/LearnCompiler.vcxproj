@@ -172,7 +172,8 @@
     <ClInclude Include="TokenKind.h" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="test.txt" />
+    <Content Include="Tests\test.txt" />
+    <Content Include="Tests\test_literial.txt" />
     <Content Include="TokenKind.def.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

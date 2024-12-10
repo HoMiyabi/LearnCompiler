@@ -39,20 +39,17 @@ public:
 
         if (IsLetter(Current()))
         {
-            token = HandleKeywordOrIdentifier();
-            return true;
+            return HandleKeywordOrIdentifier(token);
         }
         if (IsDigit(Current()))
         {
-            token = HandleLiteral();
-            return true;
+            return HandleLiteral(token);
         }
         if (IsPunctuator(Current()))
         {
-            token = HandlePunctuator();
-            return true;
+            return HandlePunctuator(token);
         }
-        message = "[错误] 非预期的字符'" + std::string{Current()} + "'位于" + std::to_string(row) + "行" + std::to_string(column) + "列";
+        message = "[错误] 非预期的字符" + std::string{Current()} + "位于" + std::to_string(row) + "行" + std::to_string(column) + "列";
         return false;
     }
 
@@ -81,7 +78,7 @@ private:
         return it == text.end();
     }
 
-    Token HandleKeywordOrIdentifier()
+    bool HandleKeywordOrIdentifier(Token& token)
     {
         std::string tokenStr;
         do
@@ -92,14 +89,17 @@ private:
 
         if (const auto its = spellingToTokenKind.find(tokenStr); its != spellingToTokenKind.end())
         {
-            return Token(its->second);
+            token.kind = its->second;
+            return true;
         }
 
         identifiers.insert(tokenStr);
-        return {TokenKind::Identifier, tokenStr};
+        token.kind = TokenKind::Identifier;
+        token.value = tokenStr;
+        return true;
     }
 
-    Token HandleLiteral()
+    bool HandleLiteral(Token& token)
     {
         std::string tokenStr;
         do
@@ -108,13 +108,29 @@ private:
             MoveNext();
         } while (!IsEnd() && IsDigit(Current()));
 
-        int value = std::stoi(tokenStr);
-
+        int value;
+        try
+        {
+            value = std::stoi(tokenStr);
+        }
+        catch (std::invalid_argument&)
+        {
+            message = "[错误] 数字" + tokenStr + "无法被解析";
+            return false;
+        }
+        catch (std::out_of_range&)
+        {
+            message = "[错误] 数字" + tokenStr + "超出范围";
+            return false;
+        }
         consts.insert(value);
-        return {TokenKind::Int, value};
+
+        token.kind = TokenKind::Int;
+        token.value = value;
+        return true;
     }
 
-    Token HandlePunctuator()
+    bool HandlePunctuator(Token& token)
     {
         std::string tokenStr;
         do
@@ -123,7 +139,15 @@ private:
             MoveNext();
         } while (!IsEnd() && IsPunctuator(Current()));
 
-        TokenKind tokenKind = spellingToTokenKind.at(tokenStr);
-        return {tokenKind, tokenStr};
+        auto it1 = spellingToTokenKind.find(tokenStr);
+        if (it1 == spellingToTokenKind.end())
+        {
+            message = "[错误] 标点符" + tokenStr + "未定义";
+            return false;
+        }
+
+        token.kind = it1->second;
+        token.value = tokenStr;
+        return true;
     }
 };
