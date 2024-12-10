@@ -111,7 +111,7 @@ private:
 
     bool HandleLiteral(Token& token)
     {
-        std::string errorPrefix = GetErrorPrefix();
+        const std::string errorPrefix = GetErrorPrefix();
         std::string tokenStr;
         do
         {
@@ -177,6 +177,7 @@ private:
             return true;
         }
 
+        const std::string errorPrefix = GetErrorPrefix();
         if (Current() == ':')
         {
             MoveNext();
@@ -186,11 +187,15 @@ private:
                 MoveNext();
                 return true;
             }
-            message = GetErrorPrefix() + "未定义的标点符";
+            message = errorPrefix + "未定义的标点符:";
+            if (!IsEnd())
+            {
+                message += Current();
+            }
             return false;
         }
 
-        message = GetErrorPrefix() + "未定义的标点符";
+        message = errorPrefix + "未定义的标点符" + Current();
         return false;
     }
 };
