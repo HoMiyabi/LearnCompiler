@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
     Token token;
     while (tokenizer.GetToken(token))
     {
-        std::cout << static_cast<int>(token.kind) << '\n';
+        std::cout << token.ToString() << '\n';
     }
     if (!tokenizer.message.empty())
     {

@@ -3,6 +3,7 @@
 #include <variant>
 
 #include "TokenKind.h"
+#include "include/magic_enum/magic_enum.hpp"
 
 class Token
 {
@@ -20,20 +21,20 @@ public:
     {
     }
 
-    // std::string ToString() const
-    // {
-    //     std::string text;
-    //     text += GetSpelling(kind);
-    //     if (kind == TokenKind::Int)
-    //     {
-    //         text += ' ';
-    //         text += std::to_string(std::get<int>(value));
-    //     }
-    //     else if (kind == TokenKind::Identifier)
-    //     {
-    //         text += ' ';
-    //         text += std::get<std::string>(value);
-    //     }
-    //     return text;
-    // }
+    std::string ToString() const
+    {
+        std::string text;
+        text += magic_enum::enum_name(kind);
+        if (kind == TokenKind::Int)
+        {
+            text += ' ';
+            text += std::to_string(std::get<int>(value));
+        }
+        else if (kind == TokenKind::Identifier)
+        {
+            text += ' ';
+            text += std::get<std::string>(value);
+        }
+        return text;
+    }
 };
