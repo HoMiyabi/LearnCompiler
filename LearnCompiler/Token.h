@@ -20,20 +20,20 @@ public:
     {
     }
 
-    std::string ToString() const
-    {
-        std::string text;
-        text += GetSpelling(kind);
-        if (kind == TokenKind::Int)
-        {
-            text += ' ';
-            text += std::to_string(std::get<int>(value));
-        }
-        else if (kind == TokenKind::Identifier)
-        {
-            text += ' ';
-            text += std::get<std::string>(value);
-        }
-        return text;
-    }
+    // std::string ToString() const
+    // {
+    //     std::string text;
+    //     text += GetSpelling(kind);
+    //     if (kind == TokenKind::Int)
+    //     {
+    //         text += ' ';
+    //         text += std::to_string(std::get<int>(value));
+    //     }
+    //     else if (kind == TokenKind::Identifier)
+    //     {
+    //         text += ' ';
+    //         text += std::get<std::string>(value);
+    //     }
+    //     return text;
+    // }
 };

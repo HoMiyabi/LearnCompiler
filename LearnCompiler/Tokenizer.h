@@ -12,14 +12,14 @@ public:
     std::string message;
 private:
     std::string text;
-    std::string::iterator it;
+    std::string::iterator iterator;
     int row;
     int column;
 
 public:
     explicit Tokenizer(std::string text): text(std::move(text)), row(1), column(1)
     {
-        it = this->text.begin();
+        iterator = this->text.begin();
     }
 
     bool GetToken(Token& token)
@@ -45,7 +45,7 @@ public:
         {
             return HandleLiteral(token);
         }
-        if (IsPunctuator(Current()))
+        if (punctuators.contains(Current()))
         {
             return HandlePunctuator(token);
         }
@@ -59,23 +59,23 @@ private:
 
     char Current() const
     {
-        return *it;
+        return *iterator;
     }
 
     void MoveNext()
     {
         ++column;
-        if (IsNewline(*it))
+        if (IsNewline(*iterator))
         {
             ++row;
             column = 1;
         }
-        ++it;
+        ++iterator;
     }
 
     bool IsEnd() const
     {
-        return it == text.end();
+        return iterator == text.end();
     }
 
     std::string GetFileLocation() const
@@ -97,9 +97,9 @@ private:
             MoveNext();
         } while (!IsEnd() && IsLetterOrDigit(Current()));
 
-        if (const auto its = spellingToTokenKind.find(tokenStr); its != spellingToTokenKind.end())
+        if (const auto it = keywordSpellingToTokenKind.find(tokenStr); it != keywordSpellingToTokenKind.end())
         {
-            token.kind = its->second;
+            token.kind = it->second;
             return true;
         }
 
@@ -111,6 +111,7 @@ private:
 
     bool HandleLiteral(Token& token)
     {
+        std::string errorPrefix = GetErrorPrefix();
         std::string tokenStr;
         do
         {
@@ -125,12 +126,12 @@ private:
         }
         catch (std::invalid_argument&)
         {
-            message = GetErrorPrefix() + "数字" + tokenStr + "无法被解析";
+            message = errorPrefix + "数字" + tokenStr + "无法被解析";
             return false;
         }
         catch (std::out_of_range&)
         {
-            message = GetErrorPrefix() + "数字" + tokenStr + "超出范围";
+            message = errorPrefix + "数字" + tokenStr + "超出范围";
             return false;
         }
         consts.insert(value);
@@ -142,22 +143,54 @@ private:
 
     bool HandlePunctuator(Token& token)
     {
-        std::string tokenStr;
-        do
+        if (const auto it = singlePunctuatorSpellingToTokenKind.find(Current());
+            it != singlePunctuatorSpellingToTokenKind.end())
         {
-            tokenStr.push_back(Current());
+            token.kind = it->second;
             MoveNext();
-        } while (!IsEnd() && IsPunctuator(Current()));
+            return true;
+        }
 
-        auto it1 = spellingToTokenKind.find(tokenStr);
-        if (it1 == spellingToTokenKind.end())
+        if (Current() == '<')
         {
-            message = GetErrorPrefix() + "标点符" + tokenStr + "未定义";
+            MoveNext();
+            if (!IsEnd() && Current() == '=')
+            {
+                token.kind = TokenKind::LessEqual;
+                MoveNext();
+                return true;
+            }
+            token.kind = TokenKind::Less;
+            return true;
+        }
+
+        if (Current() == '>')
+        {
+            MoveNext();
+            if (!IsEnd() && Current() == '=')
+            {
+                token.kind = TokenKind::GreaterEqual;
+                MoveNext();
+                return true;
+            }
+            token.kind = TokenKind::Greater;
+            return true;
+        }
+
+        if (Current() == ':')
+        {
+            MoveNext();
+            if (!IsEnd() && Current() == '=')
+            {
+                token.kind = TokenKind::ColonEqual;
+                MoveNext();
+                return true;
+            }
+            message = GetErrorPrefix() + "未定义的标点符";
             return false;
         }
 
-        token.kind = it1->second;
-        token.value = tokenStr;
-        return true;
+        message = GetErrorPrefix() + "未定义的标点符";
+        return false;
     }
 };

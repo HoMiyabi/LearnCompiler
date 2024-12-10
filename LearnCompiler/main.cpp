@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 
 #include "FileUtils.h"
 #include "Token.h"
@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
     Token token;
     while (tokenizer.GetToken(token))
     {
-        std::cout << token.ToString() << '\n';
+        std::cout << static_cast<int>(token.kind) << '\n';
     }
     if (!tokenizer.message.empty())
     {
