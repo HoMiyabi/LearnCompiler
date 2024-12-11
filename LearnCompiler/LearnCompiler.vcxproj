@@ -176,6 +176,7 @@
     <ClInclude Include="include\magic_enum\magic_enum_iostream.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_switch.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_utility.hpp" />
+    <ClInclude Include="Parser.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="Tokenizer.h" />
     <ClInclude Include="TokenKind.h" />

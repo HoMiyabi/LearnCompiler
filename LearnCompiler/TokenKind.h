@@ -22,6 +22,7 @@ enum class TokenKind
     Odd,
     Read,
     Write,
+    Program,
 
     // 标点符
     Plus,
@@ -43,6 +44,25 @@ enum class TokenKind
     Semi,
     Comma,
     ColonEqual,
+};
+
+inline const std::unordered_map<std::string_view, TokenKind> keywordSpellingToTokenKind
+{
+    {"begin", TokenKind::Begin},
+    {"end", TokenKind::End},
+    {"if", TokenKind::If},
+    {"then", TokenKind::Then},
+    {"else", TokenKind::Else},
+    {"while", TokenKind::While},
+    {"do", TokenKind::Do},
+    {"var", TokenKind::Var},
+    {"procedure", TokenKind::Procedure},
+    {"call", TokenKind::Call},
+    {"const", TokenKind::Const},
+    {"odd", TokenKind::Odd},
+    {"read", TokenKind::Read},
+    {"write", TokenKind::Write},
+    {"program", TokenKind::Program},
 };
 
 // 同时表示没有他们开头的其他长标点符
@@ -103,22 +123,4 @@ inline const std::unordered_set<char> startingPunctuators
     ';',
     ',',
     ':',
-};
-
-inline const std::unordered_map<std::string_view, TokenKind> keywordSpellingToTokenKind
-{
-    {"begin", TokenKind::Begin},
-    {"end", TokenKind::End},
-    {"if", TokenKind::If},
-    {"then", TokenKind::Then},
-    {"else", TokenKind::Else},
-    {"while", TokenKind::While},
-    {"do", TokenKind::Do},
-    {"var", TokenKind::Var},
-    {"procedure", TokenKind::Procedure},
-    {"call", TokenKind::Call},
-    {"const", TokenKind::Const},
-    {"odd", TokenKind::Odd},
-    {"read", TokenKind::Read},
-    {"write", TokenKind::Write},
 };

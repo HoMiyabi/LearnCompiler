@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 
 #include "FileUtils.h"
+#include "Parser.h"
 #include "Token.h"
 #include "Tokenizer.h"
 
@@ -15,15 +16,7 @@ int main(int argc, char* argv[])
     // std::cout << text << '\n';
 
     Tokenizer tokenizer(std::move(text));
-    Token token;
-    while (tokenizer.GetToken(token))
-    {
-        std::cout << token.ToString() << '\n';
-    }
-    if (!tokenizer.message.empty())
-    {
-        std::cout << tokenizer.message << '\n';
-    }
+    Parser parser(tokenizer);
 
     return 0;
 }
