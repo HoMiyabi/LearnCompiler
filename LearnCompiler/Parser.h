@@ -7,7 +7,7 @@ class Parser
 {
 private:
     Tokenizer& tokenizer;
-    Token token{};
+    std::optional<Token> token;
     int i = 0;
 public:
     explicit Parser(Tokenizer& tokenizer):
@@ -17,10 +17,7 @@ public:
 
     bool Parse()
     {
-        if (auto token1 = tokenizer.GetToken(); token1.has_value())
-        {
-            token = std::move(token1.value());
-        }
+        token = tokenizer.GetToken();
         try
         {
             Prog();
@@ -40,32 +37,47 @@ private:
 
     void Match(const TokenKind kind)
     {
-        if (token.kind == kind)
+        if (!token.has_value())
         {
-            if (auto token1 = tokenizer.GetToken(); token1.has_value())
-            {
-                token = std::move(token1.value());
-            }
+            throw std::runtime_error("预期的Token为" + std::string(magic_enum::enum_name(kind)) +
+                    "， 但已经到达文件尾部");
         }
-        else
+
+        if (const Token tk(std::move(token.value()));
+            tk.kind != kind)
         {
-            throw std::runtime_error(GetErrorPrefix(token.fileLocation) +
+            throw std::runtime_error(GetErrorPrefix(tk.fileLocation) +
                 "预期的Token为" + std::string(magic_enum::enum_name(kind)) +
-                "，但实际为" + std::string(magic_enum::enum_name(token.kind)));
+                "，但实际为" + std::string(magic_enum::enum_name(tk.kind)));
         }
+
+        token = tokenizer.GetToken();
+    }
+
+    [[nodiscard]]
+    bool CurrentKindIs(const TokenKind kind) const
+    {
+        if (!token.has_value())
+        {
+            throw std::runtime_error("预期的Token为" + std::string(magic_enum::enum_name(kind)) +
+                    "，但已经到达文件尾部");
+        }
+
+        return token.value().kind == kind;
+    }
+
+    Token Current()
+    {
+        if (!token.has_value())
+        {
+            throw std::runtime_error("预期Token，但已经到达文件尾部");
+        }
+        return token.value();
     }
 
     void MoveNext()
     {
-        if (auto token1 = tokenizer.GetToken(); token1.has_value())
-        {
-            token = std::move(token1.value());
-        }
-    }
-
-    TokenKind CurrentKind() const
-    {
-        return token.kind;
+        token = tokenizer.GetToken();
     }
 
     void Prog()
@@ -78,15 +90,15 @@ private:
 
     void Block()
     {
-        if (CurrentKind() == TokenKind::Const)
+        if (CurrentKindIs(TokenKind::Const))
         {
             Condecl();
         }
-        if (CurrentKind() == TokenKind::Var)
+        if (CurrentKindIs(TokenKind::Var))
         {
             Vardecl();
         }
-        if (CurrentKind() == TokenKind::Procedure)
+        if (CurrentKindIs(TokenKind::Procedure))
         {
             Proc();
         }
@@ -98,7 +110,7 @@ private:
     {
         Match(TokenKind::Const);
         Const();
-        while (CurrentKind() == TokenKind::Comma)
+        while (CurrentKindIs(TokenKind::Comma))
         {
             MoveNext();
             Const();
@@ -116,7 +128,7 @@ private:
     {
         Match(TokenKind::Var);
         Match(TokenKind::Identifier);
-        while (CurrentKind() == TokenKind::Comma)
+        while (CurrentKindIs(TokenKind::Comma))
         {
             MoveNext();
             Match(TokenKind::Identifier);
@@ -129,10 +141,10 @@ private:
         Match(TokenKind::Procedure);
         Match(TokenKind::Identifier);
         Match(TokenKind::LParen);
-        if (CurrentKind() == TokenKind::Identifier)
+        if (CurrentKindIs(TokenKind::Identifier))
         {
             Match(TokenKind::Identifier);
-            while (CurrentKind() == TokenKind::Comma)
+            while (CurrentKindIs(TokenKind::Comma))
             {
                 MoveNext();
                 Match(TokenKind::Identifier);
@@ -141,7 +153,7 @@ private:
         Match(TokenKind::RParen);
         Match(TokenKind::Semi);
         Block();
-        if (CurrentKind() == TokenKind::Semi)
+        if (CurrentKindIs(TokenKind::Semi))
         {
             MoveNext();
             Proc();
@@ -152,7 +164,7 @@ private:
     {
         Match(TokenKind::Begin);
         Statement();
-        while (CurrentKind() == TokenKind::Semi)
+        while (CurrentKindIs(TokenKind::Semi))
         {
             MoveNext();
             Statement();
@@ -162,7 +174,8 @@ private:
 
     void Statement()
     {
-        switch (CurrentKind())
+
+        switch (Current().kind)
         {
         case TokenKind::Identifier:
             {
@@ -177,7 +190,7 @@ private:
                 Lexp();
                 Match(TokenKind::Then);
                 Statement();
-                if (CurrentKind() == TokenKind::Else)
+                if (CurrentKindIs(TokenKind::Else))
                 {
                     MoveNext();
                     Statement();
@@ -196,11 +209,11 @@ private:
             {
                 Match(TokenKind::Call);
                 Match(TokenKind::Identifier);
-                if (CurrentKind() == TokenKind::LParen)
+                if (CurrentKindIs(TokenKind::LParen))
                 {
                     MoveNext();
                     Exp();
-                    while (CurrentKind() == TokenKind::Comma)
+                    while (CurrentKindIs(TokenKind::Comma))
                     {
                         MoveNext();
                         Exp();
@@ -219,7 +232,7 @@ private:
                 Match(TokenKind::Read);
                 Match(TokenKind::LParen);
                 Match(TokenKind::Identifier);
-                while (CurrentKind() == TokenKind::Comma)
+                while (CurrentKindIs(TokenKind::Comma))
                 {
                     MoveNext();
                     Match(TokenKind::Identifier);
@@ -232,7 +245,7 @@ private:
                 Match(TokenKind::Write);
                 Match(TokenKind::LParen);
                 Exp();
-                while (CurrentKind() == TokenKind::Comma)
+                while (CurrentKindIs(TokenKind::Comma))
                 {
                     MoveNext();
                     Exp();
@@ -242,7 +255,7 @@ private:
             }
         default:
             {
-                throw std::runtime_error(GetErrorPrefix(token.fileLocation) + "Statement 错误");
+                throw std::runtime_error(GetErrorPrefix(Current().fileLocation) + "Statement 错误");
             }
         }
     }
@@ -251,7 +264,7 @@ private:
     // Logical Expression
     void Lexp()
     {
-        if (CurrentKind() == TokenKind::Odd)
+        if (CurrentKindIs(TokenKind::Odd))
         {
             MoveNext();
             Exp();
@@ -269,12 +282,12 @@ private:
     // Expression
     void Exp()
     {
-        if (CurrentKind() == TokenKind::Plus || CurrentKind() == TokenKind::Minus)
+        if (CurrentKindIs(TokenKind::Plus) || CurrentKindIs(TokenKind::Minus))
         {
             MoveNext();
         }
         Term();
-        while (CurrentKind() == TokenKind::Plus || CurrentKind() == TokenKind::Minus)
+        while (CurrentKindIs(TokenKind::Plus) || CurrentKindIs(TokenKind::Minus))
         {
             Aop();
             Term();
@@ -285,7 +298,7 @@ private:
     void Term()
     {
         Factor();
-        while (CurrentKind() == TokenKind::Star || CurrentKind() == TokenKind::Slash)
+        while (CurrentKindIs(TokenKind::Star) || CurrentKindIs(TokenKind::Slash))
         {
             Mop();
             Factor();
@@ -295,7 +308,7 @@ private:
     // factor.first = id, int, (
     void Factor()
     {
-        switch (CurrentKind())
+        switch (Current().kind)
         {
         case TokenKind::Identifier:
             {
@@ -316,7 +329,7 @@ private:
             }
         default:
             {
-                throw std::runtime_error(GetErrorPrefix(token.fileLocation) +"Factor 错误");
+                throw std::runtime_error(GetErrorPrefix(Current().fileLocation) +"Factor 错误");
             }
         }
     }
@@ -324,7 +337,8 @@ private:
     // Logical Operator
     void Lop()
     {
-        switch (CurrentKind())
+        const auto tk = Current();
+        switch (tk.kind)
         {
         case TokenKind::Equal:
         case TokenKind::LessGreater:
@@ -338,32 +352,32 @@ private:
             }
         default:
             {
-                throw std::runtime_error(GetErrorPrefix(token.fileLocation) + "Lop 错误");
+                throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "Lop 错误");
             }
         }
     }
 
     void Aop()
     {
-        if (CurrentKind() == TokenKind::Plus || CurrentKind() == TokenKind::Minus)
+        if (CurrentKindIs(TokenKind::Plus) || CurrentKindIs(TokenKind::Minus))
         {
             MoveNext();
         }
         else
         {
-            throw std::runtime_error(GetErrorPrefix(token.fileLocation) + "Aop 错误");
+            throw std::runtime_error(GetErrorPrefix(Current().fileLocation) + "Aop 错误");
         }
     }
 
     void Mop()
     {
-        if (CurrentKind() == TokenKind::Star || CurrentKind() == TokenKind::Slash)
+        if (CurrentKindIs(TokenKind::Star) || CurrentKindIs(TokenKind::Slash))
         {
             MoveNext();
         }
         else
         {
-            throw std::runtime_error(GetErrorPrefix(token.fileLocation) + "Mop 错误");
+            throw std::runtime_error(GetErrorPrefix(Current().fileLocation) + "Mop 错误");
         }
     }
 };
