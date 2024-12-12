@@ -39,18 +39,21 @@ public:
 
         if (IsLetter(Current()))
         {
-            return HandleKeywordOrIdentifier(token);
+            HandleKeywordOrIdentifier(token);
+            return true;
         }
         if (IsDigit(Current()))
         {
-            return HandleLiteral(token);
+            HandleLiteral(token);
+            return true;
         }
         if (startingPunctuators.contains(Current()))
         {
-            return HandlePunctuator(token);
+            HandlePunctuator(token);
+            return true;
         }
-        message = GetErrorPrefix() + "非预期的字符" + std::string{Current()};
-        return false;
+
+        throw std::runtime_error(GetErrorPrefix() + "未定义的字符" + Current());
     }
 
 private:
@@ -88,7 +91,7 @@ private:
         return "[错误] 位于" + GetFileLocation() + ": ";
     }
 
-    bool HandleKeywordOrIdentifier(Token& token)
+    void HandleKeywordOrIdentifier(Token& token)
     {
         std::string tokenStr;
         do
@@ -100,16 +103,15 @@ private:
         if (const auto it = keywordSpellingToTokenKind.find(tokenStr); it != keywordSpellingToTokenKind.end())
         {
             token.kind = it->second;
-            return true;
+            return;
         }
 
         identifiers.insert(tokenStr);
         token.kind = TokenKind::Identifier;
         token.value = tokenStr;
-        return true;
     }
 
-    bool HandleLiteral(Token& token)
+    void HandleLiteral(Token& token)
     {
         const std::string errorPrefix = GetErrorPrefix();
         std::string tokenStr;
@@ -126,29 +128,25 @@ private:
         }
         catch (std::invalid_argument&)
         {
-            message = errorPrefix + "数字" + tokenStr + "无法被解析";
-            return false;
+            throw std::runtime_error(errorPrefix + "数字" + tokenStr + "无法被解析");
         }
         catch (std::out_of_range&)
         {
-            message = errorPrefix + "数字" + tokenStr + "超出范围";
-            return false;
+            throw std::runtime_error(errorPrefix + "数字" + tokenStr + "超出范围");
         }
         consts.insert(value);
 
         token.kind = TokenKind::Int;
         token.value = value;
-        return true;
     }
 
-    bool HandlePunctuator(Token& token)
+    void HandlePunctuator(Token& token)
     {
         if (const auto it = singlePunctuatorSpellingToTokenKind.find(Current());
             it != singlePunctuatorSpellingToTokenKind.end())
         {
             token.kind = it->second;
             MoveNext();
-            return true;
         }
 
         if (Current() == '<')
@@ -158,16 +156,13 @@ private:
             {
                 token.kind = TokenKind::LessGreater;
                 MoveNext();
-                return true;
             }
             if (!IsEnd() && Current() == '=')
             {
                 token.kind = TokenKind::LessEqual;
                 MoveNext();
-                return true;
             }
             token.kind = TokenKind::Less;
-            return true;
         }
 
         if (Current() == '>')
@@ -177,10 +172,8 @@ private:
             {
                 token.kind = TokenKind::GreaterEqual;
                 MoveNext();
-                return true;
             }
             token.kind = TokenKind::Greater;
-            return true;
         }
 
         const std::string errorPrefix = GetErrorPrefix();
@@ -191,17 +184,10 @@ private:
             {
                 token.kind = TokenKind::ColonEqual;
                 MoveNext();
-                return true;
             }
-            message = errorPrefix + "未定义的标点符:";
-            if (!IsEnd())
-            {
-                message += Current();
-            }
-            return false;
+            throw std::runtime_error(errorPrefix + "未定义的标点符:");
         }
 
-        message = errorPrefix + "未定义的标点符" + Current();
-        return false;
+        throw std::runtime_error(errorPrefix + "未定义的标点符" + Current());
     }
 };
