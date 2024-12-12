@@ -273,6 +273,7 @@ public:
         switch (CurrentKind())
         {
         case TokenKind::Equal:
+        case TokenKind::LessGreater:
         case TokenKind::Less:
         case TokenKind::LessEqual:
         case TokenKind::Greater:

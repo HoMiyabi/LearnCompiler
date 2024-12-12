@@ -25,22 +25,27 @@ enum class TokenKind
     Program,
 
     // 标点符
+    //  运算符
     Plus,
     Minus,
     Star,
     Slash,
 
+    //  比较符
     Equal,
+    LessGreater,
     Less,
     LessEqual,
     Greater,
     GreaterEqual,
 
+    //  括号
     LParen,
     RParen,
     LBrace,
     RBrace,
 
+    //  分隔符
     Semi,
     Comma,
     ColonEqual,
@@ -92,6 +97,7 @@ inline const std::unordered_map<std::string_view, TokenKind> punctuatorSpellingT
     {"/", TokenKind::Slash},
 
     {"=", TokenKind::Equal},
+    {"<>", TokenKind::LessGreater},
     {"<", TokenKind::Less},
     {"<=", TokenKind::LessEqual},
     {">", TokenKind::Greater},

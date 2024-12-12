@@ -154,6 +154,12 @@ private:
         if (Current() == '<')
         {
             MoveNext();
+            if (!IsEnd() && Current() == '>')
+            {
+                token.kind = TokenKind::LessGreater;
+                MoveNext();
+                return true;
+            }
             if (!IsEnd() && Current() == '=')
             {
                 token.kind = TokenKind::LessEqual;
