@@ -222,35 +222,64 @@ public:
         }
     }
 
+    // <lexp> → <exp> <lop> <exp>|odd <exp>
     // Logical Expression
     void Lexp()
     {
-
+        if (CurrentKind() == TokenKind::Odd)
+        {
+            MoveNext();
+            Exp();
+        }
+        else
+        {
+            Exp();
+            Lop();
+            Exp();
+        }
     }
 
+    // exp.first = +, -, id, int, (
+    // <exp> -> [+|-]<term>{<aop><term>}
     // Expression
     void Exp()
     {
-
+        if (CurrentKind() == TokenKind::Plus || CurrentKind() == TokenKind::Minus)
+        {
+            MoveNext();
+        }
+        Term();
+        while (CurrentKind() == TokenKind::Plus || CurrentKind() == TokenKind::Minus)
+        {
+            Aop();
+            Term();
+        }
     }
 
+    // term.first = id, int, (
     void Term()
     {
-
+        Factor();
+        while (CurrentKind() == TokenKind::Star || CurrentKind() == TokenKind::Slash)
+        {
+            Mop();
+            Factor();
+        }
     }
 
+    // factor.first = id, int, (
     void Factor()
     {
         switch (CurrentKind())
         {
         case TokenKind::Identifier:
             {
-                Match(TokenKind::Identifier);
+                MoveNext();
                 break;
             }
         case TokenKind::Int:
             {
-                Match(TokenKind::Int);
+                MoveNext();
                 break;
             }
         case TokenKind::LParen:

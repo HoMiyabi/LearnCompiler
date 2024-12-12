@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
 
     Tokenizer tokenizer(std::move(text));
     Parser parser(tokenizer);
+    parser.Parse();
 
     return 0;
 }
