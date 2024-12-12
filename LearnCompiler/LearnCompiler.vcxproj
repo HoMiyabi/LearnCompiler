@@ -166,6 +166,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CharUtils.h" />
+    <ClInclude Include="FileLocation.h" />
     <ClInclude Include="FileUtils.h" />
     <ClInclude Include="include\magic_enum\magic_enum.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_all.hpp" />

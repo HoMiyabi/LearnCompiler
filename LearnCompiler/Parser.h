@@ -21,10 +21,9 @@ public:
         {
             token = std::move(token1.value());
         }
-        Prog();
         try
         {
-
+            Prog();
         }
         catch (const std::exception& e)
         {
@@ -33,25 +32,26 @@ public:
         return true;
     }
 
-    void Match(TokenKind kind)
+private:
+    std::string static GetErrorPrefix(const FileLocation location)
+    {
+        return "[语法错误] 位于" + location.ToString() + ": ";
+    }
+
+    void Match(const TokenKind kind)
     {
         if (token.kind == kind)
         {
-            try
+            if (auto token1 = tokenizer.GetToken(); token1.has_value())
             {
-                if (auto token1 = tokenizer.GetToken(); token1.has_value())
-                {
-                    token = std::move(token1.value());
-                }
-            }
-            catch (const std::exception& e)
-            {
-                std::cout << e.what() << '\n';
+                token = std::move(token1.value());
             }
         }
         else
         {
-            throw std::runtime_error("Token不匹配");
+            throw std::runtime_error(GetErrorPrefix(token.fileLocation) +
+                "预期的Token为" + std::string(magic_enum::enum_name(kind)) +
+                "，但实际为" + std::string(magic_enum::enum_name(token.kind)));
         }
     }
 
@@ -242,7 +242,7 @@ public:
             }
         default:
             {
-                throw std::runtime_error("Statement 错误");
+                throw std::runtime_error(GetErrorPrefix(token.fileLocation) + "Statement 错误");
             }
         }
     }
@@ -316,7 +316,7 @@ public:
             }
         default:
             {
-                throw std::runtime_error("Factor 错误");
+                throw std::runtime_error(GetErrorPrefix(token.fileLocation) +"Factor 错误");
             }
         }
     }
@@ -338,7 +338,7 @@ public:
             }
         default:
             {
-                throw std::runtime_error("Lop 错误");
+                throw std::runtime_error(GetErrorPrefix(token.fileLocation) + "Lop 错误");
             }
         }
     }
@@ -351,7 +351,7 @@ public:
         }
         else
         {
-            throw std::runtime_error("Aop 错误");
+            throw std::runtime_error(GetErrorPrefix(token.fileLocation) + "Aop 错误");
         }
     }
 
@@ -363,7 +363,7 @@ public:
         }
         else
         {
-            throw std::runtime_error("Mop 错误");
+            throw std::runtime_error(GetErrorPrefix(token.fileLocation) + "Mop 错误");
         }
     }
 };

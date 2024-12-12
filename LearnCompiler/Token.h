@@ -10,14 +10,16 @@ class Token
 public:
     TokenKind kind;
     std::variant<std::string, int> value;
+    FileLocation fileLocation;
 
     Token() = default;
 
-    explicit Token(const TokenKind kind): kind(kind)
+    Token(const FileLocation fileLocation, const TokenKind kind): kind(kind), fileLocation(fileLocation)
     {
     }
 
-    Token(const TokenKind kind, std::variant<std::string, int> value): kind(kind), value(std::move(value))
+    Token(const FileLocation fileLocation, const TokenKind kind, std::variant<std::string, int> value):
+    kind(kind), value(std::move(value)), fileLocation(fileLocation)
     {
     }
 

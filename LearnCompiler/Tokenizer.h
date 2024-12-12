@@ -3,6 +3,7 @@
 #include <unordered_set>
 
 #include "CharUtils.h"
+#include "FileLocation.h"
 #include "Token.h"
 #include "TokenKind.h"
 
@@ -13,11 +14,10 @@ public:
 private:
     std::string text;
     std::string::iterator iterator;
-    int row;
-    int column;
+    FileLocation fileLocation;
 
 public:
-    explicit Tokenizer(std::string text): text(std::move(text)), row(1), column(1)
+    explicit Tokenizer(std::string text): text(std::move(text))
     {
         iterator = this->text.begin();
     }
@@ -50,7 +50,7 @@ public:
             return HandlePunctuator();
         }
 
-        throw std::runtime_error(GetErrorPrefix() + "未定义的字符" + Current());
+        throw std::runtime_error(GetErrorPrefix(fileLocation) + "未定义的字符" + Current());
     }
 
 private:
@@ -64,11 +64,13 @@ private:
 
     void MoveNext()
     {
-        ++column;
         if (IsNewline(*iterator))
         {
-            ++row;
-            column = 1;
+            fileLocation.ToNewline();
+        }
+        else
+        {
+            ++fileLocation.column;
         }
         ++iterator;
     }
@@ -78,18 +80,15 @@ private:
         return iterator == text.end();
     }
 
-    std::string GetFileLocation() const
+    std::string static GetErrorPrefix(const FileLocation location)
     {
-        return std::to_string(row) + "行" + std::to_string(column) + "列";
-    }
-
-    std::string GetErrorPrefix() const
-    {
-        return "[词法错误] 位于" + GetFileLocation() + ": ";
+        return "[词法错误] 位于" + location.ToString() + ": ";
     }
 
     Token HandleKeywordOrIdentifier()
     {
+        const auto location = fileLocation;
+
         std::string tokenStr;
         do
         {
@@ -99,16 +98,17 @@ private:
 
         if (const auto it = keywordSpellingToTokenKind.find(tokenStr); it != keywordSpellingToTokenKind.end())
         {
-            return Token(it->second);
+            return {location, it->second};
         }
 
         identifiers.insert(tokenStr);
-        return {TokenKind::Identifier, tokenStr};
+        return {location, TokenKind::Identifier, tokenStr};
     }
 
     Token HandleLiteral()
     {
-        const std::string errorPrefix = GetErrorPrefix();
+        const auto location = fileLocation;
+
         std::string tokenStr;
         do
         {
@@ -123,24 +123,26 @@ private:
         }
         catch (std::invalid_argument&)
         {
-            throw std::runtime_error(errorPrefix + "数字" + tokenStr + "无法被解析");
+            throw std::runtime_error(GetErrorPrefix(location) + "数字" + tokenStr + "无法被解析");
         }
         catch (std::out_of_range&)
         {
-            throw std::runtime_error(errorPrefix + "数字" + tokenStr + "超出范围");
+            throw std::runtime_error(GetErrorPrefix(location) + "数字" + tokenStr + "超出范围");
         }
         consts.insert(value);
 
-        return {TokenKind::Int, value};
+        return {location, TokenKind::Int, value};
     }
 
     Token HandlePunctuator()
     {
+        const auto location = fileLocation;
+
         if (const auto it = singlePunctuatorSpellingToTokenKind.find(Current());
             it != singlePunctuatorSpellingToTokenKind.end())
         {
             MoveNext();
-            return Token(it->second);
+            return {location, it->second};
         }
 
         if (Current() == '<')
@@ -149,14 +151,14 @@ private:
             if (!IsEnd() && Current() == '>')
             {
                 MoveNext();
-                return Token(TokenKind::LessGreater);
+                return {location, TokenKind::LessGreater};
             }
             if (!IsEnd() && Current() == '=')
             {
                 MoveNext();
-                return Token(TokenKind::LessEqual);
+                return {location, TokenKind::LessEqual};
             }
-            return Token(TokenKind::Less);
+            return {location, TokenKind::Less};
         }
 
         if (Current() == '>')
@@ -165,23 +167,22 @@ private:
             if (!IsEnd() && Current() == '=')
             {
                 MoveNext();
-                return Token(TokenKind::GreaterEqual);
+                return {location, TokenKind::GreaterEqual};
             }
-            return Token(TokenKind::Greater);
+            return {location, TokenKind::Greater};
         }
 
-        const std::string errorPrefix = GetErrorPrefix();
         if (Current() == ':')
         {
             MoveNext();
             if (!IsEnd() && Current() == '=')
             {
                 MoveNext();
-                return Token(TokenKind::ColonEqual);
+                return {location, TokenKind::ColonEqual};
             }
-            throw std::runtime_error(errorPrefix + "未定义的标点符:");
+            throw std::runtime_error(GetErrorPrefix(location) + "未定义的标点符:");
         }
 
-        throw std::runtime_error(errorPrefix + "未定义的标点符" + Current());
+        throw std::runtime_error(GetErrorPrefix(location) + "未定义的标点符" + Current());
     }
 };
