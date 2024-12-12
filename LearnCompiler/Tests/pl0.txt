@@ -1,36 +1,17 @@
 ﻿program pl0;
 const max := 100, test := 20
-var arg, ret
+var ret
 
-procedure isprime;
-var i;
+procedure sum(a, b);
+var i, sum;
 begin
-	ret := 1;
-	i := 2;
-	while i < arg do
-	begin
-		if arg / i * i = arg then
-		begin
-			ret := 0;
-			i := arg
-		end;
-		i := i + 1
-	end
+    sum := 0;
+    i := a;
+    while i < b do
+    begin
+        sum := sum + i;
+    end
+    ret := sum;
 end;
 
-procedure primes;
-begin
-	arg := 2;
-	while arg < max do
-	begin
-		call isprime;
-		if ret = 1 then write arg;
-		arg := arg + 1
-	end
-end;
-
-procedure func(a, b);
-begin
-end;
-
-call primes
+call sum(1, 100)
