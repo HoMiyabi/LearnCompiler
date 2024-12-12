@@ -85,7 +85,7 @@ private:
 
     std::string GetErrorPrefix() const
     {
-        return "[错误] 位于" + GetFileLocation() + ": ";
+        return "[词法错误] 位于" + GetFileLocation() + ": ";
     }
 
     Token HandleKeywordOrIdentifier()
