@@ -182,6 +182,7 @@
     <ClInclude Include="TokenKind.h" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Tests\pl0.txt" />
     <Content Include="Tests\test.txt" />
     <Content Include="Tests\test_literial.txt" />
     <Content Include="Tests\test_punctuator.txt" />
