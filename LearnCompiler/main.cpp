@@ -5,6 +5,14 @@
 #include "Token.h"
 #include "Tokenizer.h"
 
+void ProcessBOM(std::string& text)
+{
+    if (text.size() >= 3 && text[0] == '\xEF' && text[1] == '\xBB' && text[2] == '\xBF')
+    {
+        text.erase(0, 3);
+    }
+}
+
 int main(int argc, char* argv[])
 {
     if (argc != 2)
@@ -13,7 +21,7 @@ int main(int argc, char* argv[])
         return 0;
     }
     auto text = ReadFile(argv[1]);
-    // std::cout << text << '\n';
+    ProcessBOM(text);
 
     Tokenizer tokenizer(std::move(text));
     Parser parser(tokenizer);
