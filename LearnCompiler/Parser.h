@@ -26,7 +26,14 @@ public:
     {
         if (token.kind == kind)
         {
-            tokenizer.GetToken(token);
+            try
+            {
+                bool ok = tokenizer.GetToken(token);
+            }
+            catch (const std::exception& e)
+            {
+                std::cout << e.what() << '\n';
+            }
         }
         else
         {
