@@ -17,6 +17,7 @@ public:
 
     bool Parse()
     {
+        tokenizer.GetToken(token);
         Prog();
         return true;
     }
