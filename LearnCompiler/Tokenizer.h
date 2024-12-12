@@ -22,13 +22,13 @@ public:
         iterator = this->text.begin();
     }
 
-    bool GetToken(Token& token)
+    std::optional<Token> GetToken()
     {
         while (true)
         {
             if (IsEnd())
             {
-                return false;
+                return std::nullopt;
             }
             if (!IsSpace(Current()))
             {
@@ -39,18 +39,15 @@ public:
 
         if (IsLetter(Current()))
         {
-            HandleKeywordOrIdentifier(token);
-            return true;
+            return HandleKeywordOrIdentifier();
         }
         if (IsDigit(Current()))
         {
-            HandleLiteral(token);
-            return true;
+            return HandleLiteral();
         }
         if (startingPunctuators.contains(Current()))
         {
-            HandlePunctuator(token);
-            return true;
+            return HandlePunctuator();
         }
 
         throw std::runtime_error(GetErrorPrefix() + "未定义的字符" + Current());
@@ -91,7 +88,7 @@ private:
         return "[错误] 位于" + GetFileLocation() + ": ";
     }
 
-    void HandleKeywordOrIdentifier(Token& token)
+    Token HandleKeywordOrIdentifier()
     {
         std::string tokenStr;
         do
@@ -102,16 +99,14 @@ private:
 
         if (const auto it = keywordSpellingToTokenKind.find(tokenStr); it != keywordSpellingToTokenKind.end())
         {
-            token.kind = it->second;
-            return;
+            return Token(it->second);
         }
 
         identifiers.insert(tokenStr);
-        token.kind = TokenKind::Identifier;
-        token.value = tokenStr;
+        return {TokenKind::Identifier, tokenStr};
     }
 
-    void HandleLiteral(Token& token)
+    Token HandleLiteral()
     {
         const std::string errorPrefix = GetErrorPrefix();
         std::string tokenStr;
@@ -136,17 +131,16 @@ private:
         }
         consts.insert(value);
 
-        token.kind = TokenKind::Int;
-        token.value = value;
+        return {TokenKind::Int, value};
     }
 
-    void HandlePunctuator(Token& token)
+    Token HandlePunctuator()
     {
         if (const auto it = singlePunctuatorSpellingToTokenKind.find(Current());
             it != singlePunctuatorSpellingToTokenKind.end())
         {
-            token.kind = it->second;
             MoveNext();
+            return Token(it->second);
         }
 
         if (Current() == '<')
@@ -154,15 +148,15 @@ private:
             MoveNext();
             if (!IsEnd() && Current() == '>')
             {
-                token.kind = TokenKind::LessGreater;
                 MoveNext();
+                return Token(TokenKind::LessGreater);
             }
             if (!IsEnd() && Current() == '=')
             {
-                token.kind = TokenKind::LessEqual;
                 MoveNext();
+                return Token(TokenKind::LessEqual);
             }
-            token.kind = TokenKind::Less;
+            return Token(TokenKind::Less);
         }
 
         if (Current() == '>')
@@ -170,10 +164,10 @@ private:
             MoveNext();
             if (!IsEnd() && Current() == '=')
             {
-                token.kind = TokenKind::GreaterEqual;
                 MoveNext();
+                return Token(TokenKind::GreaterEqual);
             }
-            token.kind = TokenKind::Greater;
+            return Token(TokenKind::Greater);
         }
 
         const std::string errorPrefix = GetErrorPrefix();
@@ -182,8 +176,8 @@ private:
             MoveNext();
             if (!IsEnd() && Current() == '=')
             {
-                token.kind = TokenKind::ColonEqual;
                 MoveNext();
+                return Token(TokenKind::ColonEqual);
             }
             throw std::runtime_error(errorPrefix + "未定义的标点符:");
         }

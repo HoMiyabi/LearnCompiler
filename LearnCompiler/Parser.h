@@ -17,8 +17,19 @@ public:
 
     bool Parse()
     {
-        tokenizer.GetToken(token);
+        if (auto token1 = tokenizer.GetToken(); token1.has_value())
+        {
+            token = std::move(token1.value());
+        }
         Prog();
+        try
+        {
+
+        }
+        catch (const std::exception& e)
+        {
+            std::cout << e.what() << '\n';
+        }
         return true;
     }
 
@@ -28,7 +39,10 @@ public:
         {
             try
             {
-                bool ok = tokenizer.GetToken(token);
+                if (auto token1 = tokenizer.GetToken(); token1.has_value())
+                {
+                    token = std::move(token1.value());
+                }
             }
             catch (const std::exception& e)
             {
@@ -43,7 +57,10 @@ public:
 
     void MoveNext()
     {
-        tokenizer.GetToken(token);
+        if (auto token1 = tokenizer.GetToken(); token1.has_value())
+        {
+            token = std::move(token1.value());
+        }
     }
 
     TokenKind CurrentKind() const
