@@ -3,15 +3,17 @@ const max := 100, test := 20
 var ret
 
 procedure sum(a, b);
-var i, sum;
+var i, sum
 begin
     sum := 0;
     i := a;
     while i < b do
     begin
-        sum := sum + i;
-    end
-    ret := sum;
-end;
+        sum := sum + i
+    end;
+    ret := sum
+end
 
-call sum(1, 100)
+begin
+    call sum(1, 100)
+end
