@@ -35,7 +35,7 @@ private:
         return "[语法错误] 位于" + location.ToString() + ": ";
     }
 
-    void Match(const TokenKind kind)
+    Token Match(const TokenKind kind)
     {
         if (!token.has_value())
         {
@@ -43,15 +43,16 @@ private:
                     "， 但已经到达文件尾部");
         }
 
-        if (const Token tk(std::move(token.value()));
-            tk.kind != kind)
+        Token tk = std::move(token.value());
+        if (tk.kind != kind)
         {
             throw std::runtime_error(GetErrorPrefix(tk.fileLocation) +
-                "预期的Token为" + std::string(magic_enum::enum_name(kind)) +
-                "，但实际为" + std::string(magic_enum::enum_name(tk.kind)));
+            "预期的Token为" + std::string(magic_enum::enum_name(kind)) +
+            "，但实际为" + std::string(magic_enum::enum_name(tk.kind)));
         }
 
         token = tokenizer.GetToken();
+        return tk;
     }
 
     [[nodiscard]]
@@ -119,9 +120,9 @@ private:
 
     void Const()
     {
-        Match(TokenKind::Identifier);
+        auto tkId = Match(TokenKind::Identifier);
         Match(TokenKind::ColonEqual);
-        Match(TokenKind::Int);
+        auto tkInt = Match(TokenKind::Int);
     }
 
     void Vardecl()
