@@ -9,7 +9,7 @@ class Token
 {
 public:
     TokenKind kind;
-    std::variant<std::string, int> value;
+    std::variant<std::string, int32_t> value;
     FileLocation fileLocation;
 
     Token() = default;
@@ -23,6 +23,16 @@ public:
     {
     }
 
+    std::string GetString() const
+    {
+        return std::get<std::string>(value);
+    }
+
+    int32_t GetInt32() const
+    {
+        return std::get<int32_t>(value);
+    }
+
     std::string ToString() const
     {
         std::string text;
@@ -30,7 +40,7 @@ public:
         if (kind == TokenKind::Int)
         {
             text += ' ';
-            text += std::to_string(std::get<int>(value));
+            text += std::to_string(std::get<int32_t>(value));
         }
         else if (kind == TokenKind::Identifier)
         {

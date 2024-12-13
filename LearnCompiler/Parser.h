@@ -1,7 +1,42 @@
 ﻿#pragma once
 #include <iostream>
 
+#include "ILOP.h"
 #include "Tokenizer.h"
+
+enum class IdType
+{
+    Const,
+    Var,
+};
+
+class IdInfo
+{
+public:
+    IdType type;
+    int32_t address;
+
+    explicit IdInfo(IdType type, int32_t address):
+    type(type),
+    address(address)
+    {
+    }
+};
+
+class ProcedureInfo
+{
+public:
+    int32_t address;
+    std::string name;
+    std::vector<std::string> params;
+
+    ProcedureInfo(int32_t address, std::string name, std::vector<std::string> params):
+    address(address),
+    name(std::move(name)),
+    params(std::move(params))
+    {
+    }
+};
 
 class Parser
 {
@@ -9,6 +44,12 @@ private:
     Tokenizer& tokenizer;
     std::optional<Token> token;
     int i = 0;
+
+    std::vector<ILOP> code;
+    int stk = 0;
+    std::unordered_map<std::string, IdInfo> idConstVar;
+    std::unordered_map<std::string, ProcedureInfo> procedures;
+
 public:
     explicit Parser(Tokenizer& tokenizer):
     tokenizer(tokenizer)
@@ -35,6 +76,11 @@ private:
         return "[语法错误] 位于" + location.ToString() + ": ";
     }
 
+    void GenCode(ILOP ilop)
+    {
+        code.push_back(ilop);
+    }
+
     Token Match(const TokenKind kind)
     {
         if (!token.has_value())
@@ -55,6 +101,17 @@ private:
         return tk;
     }
 
+    bool TryMatch(const TokenKind kind)
+    {
+        if (!token.has_value() || token.value().kind != kind)
+        {
+            return false;
+        }
+
+        token = tokenizer.GetToken();
+        return true;
+    }
+
     [[nodiscard]]
     bool CurrentKindIs(const TokenKind kind) const
     {
@@ -71,7 +128,7 @@ private:
     {
         if (!token.has_value())
         {
-            throw std::runtime_error("预期Token，但已经到达文件尾部");
+            throw std::runtime_error("预期下一个Token，但已经到达文件尾部");
         }
         return token.value();
     }
@@ -106,14 +163,12 @@ private:
         Body();
     }
 
-
     void Condecl()
     {
         Match(TokenKind::Const);
         Const();
-        while (CurrentKindIs(TokenKind::Comma))
+        while (TryMatch(TokenKind::Comma))
         {
-            MoveNext();
             Const();
         }
     }
@@ -123,16 +178,55 @@ private:
         auto tkId = Match(TokenKind::Identifier);
         Match(TokenKind::ColonEqual);
         auto tkInt = Match(TokenKind::Int);
+
+        auto [it, ok] = idConstVar.insert({tkId.GetString(), IdInfo(IdType::Var, stk)});
+        if (!ok)
+        {
+            if (it->second.type == IdType::Const)
+            {
+                throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + "已定义常量" + tkId.GetString());
+            }
+            if (it->second.type == IdType::Var)
+            {
+                throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + "已定义变量" + tkId.GetString());
+            }
+            throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.GetString() + "已定义");
+        }
+
+        GenCode(ILOP(ILOPCode::INT, 0, 1));
+        GenCode(ILOP(ILOPCode::LIT, 0, tkInt.GetInt32()));
+        GenCode(ILOP(ILOPCode::STO, 0, stk));
+        stk++;
     }
 
     void Vardecl()
     {
         Match(TokenKind::Var);
-        Match(TokenKind::Identifier);
-        while (CurrentKindIs(TokenKind::Comma))
+        auto tkId = Match(TokenKind::Identifier);
+
+        auto pair = idConstVar.insert({tkId.GetString(), IdInfo(IdType::Var, stk)});
+        if (!pair.second)
         {
-            MoveNext();
-            Match(TokenKind::Identifier);
+            std::string typeStr = pair.first->second.type == IdType::Const ? "常量" : "变量";
+            throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + "已定义" + typeStr + tkId.GetString());
+        }
+
+        GenCode(ILOP(ILOPCode::INT, 0, 1));
+        stk++;
+
+        while (TryMatch(TokenKind::Comma))
+        {
+            tkId = Match(TokenKind::Identifier);
+
+            pair = idConstVar.insert({tkId.GetString(), IdInfo(IdType::Var, stk)});
+            if (!pair.second)
+            {
+                std::string typeStr = pair.first->second.type == IdType::Const ? "常量" : "变量";
+                throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + "已定义" + typeStr + tkId.GetString());
+            }
+
+            GenCode(ILOP(ILOPCode::INT, 0, 1));
+            stk++;
         }
     }
 
@@ -140,23 +234,30 @@ private:
     void Proc()
     {
         Match(TokenKind::Procedure);
-        Match(TokenKind::Identifier);
+        auto tkName = Match(TokenKind::Identifier);
         Match(TokenKind::LParen);
+
+        std::vector<std::string> params;
+
+        Token tkParam;
         if (CurrentKindIs(TokenKind::Identifier))
         {
-            Match(TokenKind::Identifier);
-            while (CurrentKindIs(TokenKind::Comma))
+            tkParam = Match(TokenKind::Identifier);
+            params.push_back(tkParam.GetString());
+            while (TryMatch(TokenKind::Comma))
             {
-                MoveNext();
-                Match(TokenKind::Identifier);
+                tkParam = Match(TokenKind::Identifier);
+                params.push_back(tkParam.GetString());
             }
         }
         Match(TokenKind::RParen);
         Match(TokenKind::Semi);
+
+        procedures.insert({tkName.GetString(), ProcedureInfo(114514, tkName.GetString(), std::move(params))});
+
         Block();
-        if (CurrentKindIs(TokenKind::Semi))
+        if (TryMatch(TokenKind::Semi))
         {
-            MoveNext();
             Proc();
         }
     }
@@ -265,9 +366,8 @@ private:
     // Logical Expression
     void Lexp()
     {
-        if (CurrentKindIs(TokenKind::Odd))
+        if (TryMatch(TokenKind::Odd))
         {
-            MoveNext();
             Exp();
         }
         else

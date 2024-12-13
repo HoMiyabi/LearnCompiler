@@ -20,13 +20,11 @@ public:
 
     void Interpret(const std::vector<ILOP>& code)
     {
-        if (code.empty()) return;
-
         stk.clear();
         // T = 0;
         B = 0;
         ip = 0;
-        do
+        while (ip != code.size())
         {
             FetchOP(code);
             switch (I.F)
@@ -68,7 +66,6 @@ public:
                 break;
             }
         }
-        while (ip != code.size());
     }
 
 private:
