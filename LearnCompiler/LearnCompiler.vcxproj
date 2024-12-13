@@ -168,6 +168,9 @@
     <ClInclude Include="CharUtils.h" />
     <ClInclude Include="FileLocation.h" />
     <ClInclude Include="FileUtils.h" />
+    <ClInclude Include="ILInterpreter.h" />
+    <ClInclude Include="ILOP.h" />
+    <ClInclude Include="ILOPCode.h" />
     <ClInclude Include="include\magic_enum\magic_enum.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_all.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_containers.hpp" />
