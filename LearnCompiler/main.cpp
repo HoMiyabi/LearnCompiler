@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 
 #include "FileUtils.h"
+#include "ILInterpreter.h"
 #include "Parser.h"
 #include "Token.h"
 #include "Tokenizer.h"
@@ -26,6 +27,13 @@ int main(int argc, char* argv[])
     Tokenizer tokenizer(std::move(text));
     Parser parser(tokenizer);
     parser.Parse();
+
+    auto& code = parser.code;
+    // for (const auto& inst : code)
+    // {
+    //     std::cout << inst.ToString() << '\n';
+    // }
+    ILInterpreter().Interpret(code);
 
     return 0;
 }

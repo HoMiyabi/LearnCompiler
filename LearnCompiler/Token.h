@@ -24,13 +24,13 @@ public:
     }
 
     [[nodiscard]]
-    const std::string& GetString() const
+    const std::string& String() const
     {
         return std::get<std::string>(value);
     }
 
     [[nodiscard]]
-    int32_t GetInt32() const
+    int32_t Int32() const
     {
         return std::get<int32_t>(value);
     }

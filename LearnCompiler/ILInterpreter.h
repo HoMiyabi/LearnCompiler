@@ -58,8 +58,9 @@ public:
                     stk.push_back(rip);
                     stk.push_back(rbp);
                     rbp = stk.size();
+                    rip = I.A;
+                    break;
                 }
-                break;
             case ILInstType::INT:
                 {
                     stk.resize(stk.size() + I.A);

@@ -1,19 +1,19 @@
-﻿program pl0;
-const max := 100, test := 20
-var ret
+﻿program krrlangtest;
+const max := 100
 
 procedure sum(a, b);
 var i, sum
 begin
     sum := 0;
     i := a;
-    while i < b do
+    while i <= b do
     begin
-        sum := sum + i
+        sum := sum + i;
+        i := i + 1
     end;
-    ret := sum
+    write(sum)
 end
 
 begin
-    call sum(1, 100)
+    call sum(1, max)
 end
