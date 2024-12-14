@@ -23,11 +23,13 @@ public:
     {
     }
 
-    std::string GetString() const
+    [[nodiscard]]
+    const std::string& GetString() const
     {
         return std::get<std::string>(value);
     }
 
+    [[nodiscard]]
     int32_t GetInt32() const
     {
         return std::get<int32_t>(value);

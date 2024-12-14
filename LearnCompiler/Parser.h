@@ -1,7 +1,8 @@
 ﻿#pragma once
 #include <iostream>
 
-#include "ILOP.h"
+#include "ILInst.h"
+#include "ILInstOprType.h"
 #include "Tokenizer.h"
 
 enum class IdType
@@ -26,12 +27,12 @@ public:
 class ProcedureInfo
 {
 public:
-    int32_t address;
+    int32_t codeAddress;
     std::string name;
     std::vector<std::string> params;
 
-    ProcedureInfo(int32_t address, std::string name, std::vector<std::string> params):
-    address(address),
+    ProcedureInfo(int32_t codeAddress, std::string name, std::vector<std::string> params):
+    codeAddress(codeAddress),
     name(std::move(name)),
     params(std::move(params))
     {
@@ -45,7 +46,7 @@ private:
     std::optional<Token> token;
     int i = 0;
 
-    std::vector<ILOP> code;
+    std::vector<ILInst> code;
     int stk = 0;
     std::unordered_map<std::string, IdInfo> idConstVar;
     std::unordered_map<std::string, ProcedureInfo> procedures;
@@ -76,20 +77,15 @@ private:
         return "[语法错误] 位于" + location.ToString() + ": ";
     }
 
-    void GenCode(ILOP ilop)
-    {
-        code.push_back(ilop);
-    }
-
     Token Match(const TokenKind kind)
     {
-        if (!token.has_value())
+        if (!token)
         {
             throw std::runtime_error("预期的Token为" + std::string(magic_enum::enum_name(kind)) +
                     "， 但已经到达文件尾部");
         }
 
-        Token tk = std::move(token.value());
+        Token tk = token.value();
         if (tk.kind != kind)
         {
             throw std::runtime_error(GetErrorPrefix(tk.fileLocation) +
@@ -101,15 +97,17 @@ private:
         return tk;
     }
 
-    bool TryMatch(const TokenKind kind)
+    std::optional<Token> TryMatch(const TokenKind kind)
     {
         if (!token.has_value() || token.value().kind != kind)
         {
-            return false;
+            return std::nullopt;
         }
 
+        auto tk = token.value();
+
         token = tokenizer.GetToken();
-        return true;
+        return tk;
     }
 
     [[nodiscard]]
@@ -193,9 +191,9 @@ private:
             throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.GetString() + "已定义");
         }
 
-        GenCode(ILOP(ILOPCode::INT, 0, 1));
-        GenCode(ILOP(ILOPCode::LIT, 0, tkInt.GetInt32()));
-        GenCode(ILOP(ILOPCode::STO, 0, stk));
+        code.emplace_back(ILInstType::INT, 0, 1);
+        code.emplace_back(ILInstType::LIT, 0, tkInt.GetInt32());
+        code.emplace_back(ILInstType::STO, 0, stk);
         stk++;
     }
 
@@ -211,7 +209,7 @@ private:
             throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + "已定义" + typeStr + tkId.GetString());
         }
 
-        GenCode(ILOP(ILOPCode::INT, 0, 1));
+        code.emplace_back(ILInstType::INT, 0, 1);
         stk++;
 
         while (TryMatch(TokenKind::Comma))
@@ -225,7 +223,7 @@ private:
                 throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + "已定义" + typeStr + tkId.GetString());
             }
 
-            GenCode(ILOP(ILOPCode::INT, 0, 1));
+            code.emplace_back(ILInstType::INT, 0, 1);
             stk++;
         }
     }
@@ -253,7 +251,7 @@ private:
         Match(TokenKind::RParen);
         Match(TokenKind::Semi);
 
-        procedures.insert({tkName.GetString(), ProcedureInfo(114514, tkName.GetString(), std::move(params))});
+        procedures.insert({tkName.GetString(), ProcedureInfo(code.size(), tkName.GetString(), std::move(params))});
 
         Block();
         if (TryMatch(TokenKind::Semi))
@@ -266,9 +264,8 @@ private:
     {
         Match(TokenKind::Begin);
         Statement();
-        while (CurrentKindIs(TokenKind::Semi))
+        while (TryMatch(TokenKind::Semi))
         {
-            MoveNext();
             Statement();
         }
         Match(TokenKind::End);
@@ -276,7 +273,6 @@ private:
 
     void Statement()
     {
-
         switch (Current().kind)
         {
         case TokenKind::Identifier:
@@ -292,9 +288,8 @@ private:
                 Lexp();
                 Match(TokenKind::Then);
                 Statement();
-                if (CurrentKindIs(TokenKind::Else))
+                if (TryMatch(TokenKind::Else))
                 {
-                    MoveNext();
                     Statement();
                 }
                 break;
@@ -369,12 +364,50 @@ private:
         if (TryMatch(TokenKind::Odd))
         {
             Exp();
+            code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Odd));
         }
         else
         {
             Exp();
-            Lop();
+            auto tk = Lop();
             Exp();
+            switch (tk.kind)
+            {
+            case TokenKind::Equal:
+                {
+                    code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Eql));
+                    break;
+                }
+            case TokenKind::LessGreater:
+                {
+                    code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Neq));
+                    break;
+                }
+            case TokenKind::Less:
+                {
+                    code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Lss));
+                    break;
+                }
+            case TokenKind::LessEqual:
+                {
+                    code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Leq));
+                    break;
+                }
+            case TokenKind::Greater:
+                {
+                    code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Gtr));
+                    break;
+                }
+            case TokenKind::GreaterEqual:
+                {
+                    code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Geq));
+                    break;
+                }
+            default:
+                {
+                    throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "Lexp 错误");
+                }
+            }
         }
     }
 
@@ -383,15 +416,33 @@ private:
     // Expression
     void Exp()
     {
-        if (CurrentKindIs(TokenKind::Plus) || CurrentKindIs(TokenKind::Minus))
+        bool flag = false;
+        if (TryMatch(TokenKind::Minus))
         {
-            MoveNext();
+            flag = true;
+        }
+        else
+        {
+            TryMatch(TokenKind::Plus);
         }
         Term();
-        while (CurrentKindIs(TokenKind::Plus) || CurrentKindIs(TokenKind::Minus))
+        if (flag)
         {
-            Aop();
+            code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Neg));
+        }
+        while (token && (token->kind == TokenKind::Minus || token->kind == TokenKind::Plus))
+        {
+            Token tkOp = *token;
+            MoveNext();
             Term();
+            if (tkOp.kind == TokenKind::Minus)
+            {
+                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Sub));
+            }
+            else
+            {
+                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Add));
+            }
         }
     }
 
@@ -399,44 +450,52 @@ private:
     void Term()
     {
         Factor();
-        while (CurrentKindIs(TokenKind::Star) || CurrentKindIs(TokenKind::Slash))
+        while (token && (token->kind == TokenKind::Star || token->kind == TokenKind::Slash))
         {
-            Mop();
+            auto tkOp = *token;
             Factor();
+            if (tkOp.kind == TokenKind::Star)
+            {
+                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Mul));
+            }
+            else
+            {
+                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Div));
+            }
         }
     }
-
+    // <factor> -> <id>|<integer>|(<exp>)
     // factor.first = id, int, (
     void Factor()
     {
-        switch (Current().kind)
+        std::optional<Token> tk;
+        tk = TryMatch(TokenKind::Identifier);
+        if (tk)
         {
-        case TokenKind::Identifier:
+            auto it = idConstVar.find(tk->GetString());
+            if (it == idConstVar.end())
             {
-                MoveNext();
-                break;
+                throw std::runtime_error(GetErrorPrefix(tk->fileLocation) + "未定义的标识符");
             }
-        case TokenKind::Int:
-            {
-                MoveNext();
-                break;
-            }
-        case TokenKind::LParen:
-            {
-                Match(TokenKind::LParen);
-                Exp();
-                Match(TokenKind::RParen);
-                break;
-            }
-        default:
-            {
-                throw std::runtime_error(GetErrorPrefix(Current().fileLocation) +"Factor 错误");
-            }
+            code.emplace_back(ILInstType::LOD, 0, it->second.address);
         }
+        tk = TryMatch(TokenKind::Int);
+        if (tk)
+        {
+            code.emplace_back(ILInstType::LIT, 0, tk->GetInt32());
+            return;
+        }
+        if (TryMatch(TokenKind::LParen))
+        {
+            Exp();
+            Match(TokenKind::RParen);
+            return;
+        }
+        throw std::runtime_error(GetErrorPrefix(Current().fileLocation) + "Factor 错误");
     }
 
     // Logical Operator
-    void Lop()
+    Token Lop()
     {
         const auto tk = Current();
         switch (tk.kind)
@@ -449,36 +508,12 @@ private:
         case TokenKind::GreaterEqual:
             {
                 MoveNext();
-                break;
+                return tk;
             }
         default:
             {
                 throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "Lop 错误");
             }
-        }
-    }
-
-    void Aop()
-    {
-        if (CurrentKindIs(TokenKind::Plus) || CurrentKindIs(TokenKind::Minus))
-        {
-            MoveNext();
-        }
-        else
-        {
-            throw std::runtime_error(GetErrorPrefix(Current().fileLocation) + "Aop 错误");
-        }
-    }
-
-    void Mop()
-    {
-        if (CurrentKindIs(TokenKind::Star) || CurrentKindIs(TokenKind::Slash))
-        {
-            MoveNext();
-        }
-        else
-        {
-            throw std::runtime_error(GetErrorPrefix(Current().fileLocation) + "Mop 错误");
         }
     }
 };

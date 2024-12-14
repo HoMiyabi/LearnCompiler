@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-enum class ILOPCode
+enum class ILInstType
 {
     LIT, // Load Immediate 立即数入栈
     OPR, // Operation

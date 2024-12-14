@@ -1,12 +1,11 @@
 ﻿#pragma once
-#include <stack>
 #include <vector>
-#include "ILOP.h"
+#include "ILInst.h"
 
 class ILInterpreter
 {
 private:
-    ILOP I {ILOPCode::LIT, 0, 0}; // 指令寄存器I: 存放当前要执行的代码
+    ILInst I {ILInstType::LIT, 0, 0}; // 指令寄存器I: 存放当前要执行的代码
     // int T = 0; // 栈顶指示器寄存器T：指向数据栈STACK的栈顶的下一个元素
     int B = 0; // 基地址寄存器B：存放当前运行过程的数据区在STACK中的起始地址
     int ip = 0; // 程序地址寄存器P：存放下一条要执行的指令地址
@@ -18,7 +17,7 @@ public:
         stk.reserve(1024);
     }
 
-    void Interpret(const std::vector<ILOP>& code)
+    void Interpret(const std::vector<ILInst>& code)
     {
         stk.clear();
         // T = 0;
@@ -29,29 +28,29 @@ public:
             FetchOP(code);
             switch (I.F)
             {
-            case ILOPCode::LIT:
+            case ILInstType::LIT:
                 {
                     stk.push_back(I.A);
                     break;
                 }
-            case ILOPCode::OPR:
+            case ILInstType::OPR:
                 break;
-            case ILOPCode::LOD:
+            case ILInstType::LOD:
                 {
                     break;
                 }
-            case ILOPCode::STO:
+            case ILInstType::STO:
                 break;
-            case ILOPCode::CAL:
+            case ILInstType::CAL:
                 break;
-            case ILOPCode::INT:
+            case ILInstType::INT:
                 break;
-            case ILOPCode::JMP:
+            case ILInstType::JMP:
                 {
                     ip = I.A;
                     break;
                 }
-            case ILOPCode::JPC:
+            case ILInstType::JPC:
                 {
                     if (stk.back() == 0)
                     {
@@ -60,16 +59,16 @@ public:
                     stk.pop_back();
                     break;
                 }
-            case ILOPCode::RED:
+            case ILInstType::RED:
                 break;
-            case ILOPCode::WRT:
+            case ILInstType::WRT:
                 break;
             }
         }
     }
 
 private:
-    void FetchOP(const std::vector<ILOP>& code)
+    void FetchOP(const std::vector<ILInst>& code)
     {
         I = code[ip];
         ip++;

@@ -168,9 +168,10 @@
     <ClInclude Include="CharUtils.h" />
     <ClInclude Include="FileLocation.h" />
     <ClInclude Include="FileUtils.h" />
+    <ClInclude Include="ILInstOprType.h" />
     <ClInclude Include="ILInterpreter.h" />
-    <ClInclude Include="ILOP.h" />
-    <ClInclude Include="ILOPCode.h" />
+    <ClInclude Include="ILInst.h" />
+    <ClInclude Include="ILInstType.h" />
     <ClInclude Include="include\magic_enum\magic_enum.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_all.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_containers.hpp" />
@@ -186,6 +187,7 @@
     <ClInclude Include="TokenKind.h" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Tests\hello.pas" />
     <Content Include="Tests\pl0.txt" />
     <Content Include="Tests\refer_code.il" />
     <Content Include="Tests\refer_code.krr" />
