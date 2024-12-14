@@ -17,6 +17,7 @@ public:
     VarType type;
     std::string name;
     int32_t runtimeAddress;
+    int32_t value = 0;
 
     explicit VarInfo(VarType type, std::string name, int32_t runtimeAddress):
     type(type),
@@ -113,27 +114,15 @@ private:
 
     std::optional<Token> TryMatch(const TokenKind kind)
     {
-        if (!token.has_value() || token.value().kind != kind)
+        if (!token || token->kind != kind)
         {
             return std::nullopt;
         }
 
-        auto tk = token.value();
+        auto tk = *token;
 
         token = tokenizer.GetToken();
         return tk;
-    }
-
-    [[nodiscard]]
-    bool CurrentKindIs(const TokenKind kind) const
-    {
-        if (!token.has_value())
-        {
-            throw std::runtime_error("预期的Token为" + std::string(magic_enum::enum_name(kind)) +
-                    "，但已经到达文件尾部");
-        }
-
-        return token.value().kind == kind;
     }
 
     bool TryCurrent(const TokenKind kind) const
@@ -178,6 +167,8 @@ private:
 
     void Block()
     {
+        ProcedureInfo* procedure = path.back();
+
         if (TryCurrent(TokenKind::Const))
         {
             Condecl();
@@ -186,15 +177,29 @@ private:
         {
             Vardecl();
         }
+
+        if (!procedure->vars.empty())
+        {
+            code.emplace_back(ILInstType::INT, 0, procedure->vars.size());
+        }
+        for (auto it = procedure->vars.begin(); it != procedure->vars.end() && it->type == VarType::Const; ++it)
+        {
+            code.emplace_back(ILInstType::LIT, 0, it->value);
+            code.emplace_back(ILInstType::STO, 0, it->runtimeAddress);
+        }
+
         if (TryCurrent(TokenKind::Procedure))
         {
             code.emplace_back(ILInstType::JMP, 0, 0);
-            int jmpIdx = code.size() - 1;
+            int jmpIdx = static_cast<int>(code.size()) - 1;
             Proc();
-            code[jmpIdx].A = code.size();
+            code[jmpIdx].A = static_cast<int>(code.size());
         }
         Body();
-        code.emplace_back(ILInstType::INT, 0, -((int)path.back()->vars.size()));
+        if (!procedure->vars.empty())
+        {
+            code.emplace_back(ILInstType::INT, 0, -static_cast<int>(path.back()->vars.size()));
+        }
     }
 
     void Condecl()
@@ -219,11 +224,8 @@ private:
             throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() + "重复定义");
         }
 
-        code.emplace_back(ILInstType::INT, 0, 1);
-        code.emplace_back(ILInstType::LIT, 0, tkInt.Int32());
-        code.emplace_back(ILInstType::STO, 0, procedure.vars.size());
-
         procedure.vars.emplace_back(VarType::Const, tkId.String(), procedure.vars.size());
+        procedure.vars.back().value = tkInt.Int32();
     }
 
     void Vardecl()
@@ -241,8 +243,6 @@ private:
             }
             procedure.vars.emplace_back(VarType::Var, tkId.String(), procedure.vars.size());
         } while (TryMatch(TokenKind::Comma));
-
-        code.emplace_back(ILInstType::INT, 0, procedure.vars.size());
     }
 
     bool static ProcedureContainsVar(const ProcedureInfo& procedure, const std::string& name)
@@ -574,6 +574,7 @@ private:
         }
     }
 
+    // <term> -> <factor>{<mop><factor>}
     // term.first = id, int, (
     void Term()
     {
