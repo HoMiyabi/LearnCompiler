@@ -194,16 +194,16 @@ private:
             code[jmpIdx].A = code.size();
         }
         Body();
+        code.emplace_back(ILInstType::INT, 0, -((int)path.back()->vars.size()));
     }
 
     void Condecl()
     {
         Match(TokenKind::Const);
-        Const();
-        while (TryMatch(TokenKind::Comma))
+        do
         {
             Const();
-        }
+        } while (TryMatch(TokenKind::Comma));
     }
 
     void Const()
@@ -214,10 +214,7 @@ private:
         Match(TokenKind::ColonEqual);
         auto tkInt = Match(TokenKind::Int);
 
-        const auto it = std::ranges::find_if(procedure.vars, [&](auto& var) {
-            return var.name == tkId.String();
-        });
-        if (it != procedure.vars.end())
+        if (ProcedureContainsVar(procedure, tkId.String()))
         {
             throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() + "重复定义");
         }
@@ -234,30 +231,33 @@ private:
         ProcedureInfo& procedure = *path.back();
 
         Match(TokenKind::Var);
-        auto tkId = Match(TokenKind::Identifier);
-
-        if (std::ranges::find_if(procedure.vars, [&](auto& var) { return var.name == tkId.String();})
-            != procedure.vars.end())
+        do
         {
-            throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() + "重复定义");
-        }
+            auto tkId = Match(TokenKind::Identifier);
 
-        code.emplace_back(ILInstType::INT, 0, 1);
-        procedure.vars.emplace_back(VarType::Var, tkId.String(), procedure.vars.size());
-
-        while (TryMatch(TokenKind::Comma))
-        {
-            tkId = Match(TokenKind::Identifier);
-
-            if (std::ranges::find_if(procedure.vars, [&](auto& var) {return var.name == tkId.String();})
-                != procedure.vars.end())
+            if (ProcedureContainsVar(procedure, tkId.String()))
             {
                 throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() + "重复定义");
             }
-
-            code.emplace_back(ILInstType::INT, 0, 1);
             procedure.vars.emplace_back(VarType::Var, tkId.String(), procedure.vars.size());
+        } while (TryMatch(TokenKind::Comma));
+
+        code.emplace_back(ILInstType::INT, 0, procedure.vars.size());
+    }
+
+    bool static ProcedureContainsVar(const ProcedureInfo& procedure, const std::string& name)
+    {
+        if (std::ranges::find_if(procedure.params, [&](auto& var) { return var.name == name; })
+            != procedure.params.end())
+        {
+            return true;
         }
+        if (std::ranges::find_if(procedure.vars, [&](auto& var) { return var.name == name; })
+            != procedure.vars.end())
+        {
+            return true;
+        }
+        return false;
     }
 
     // Procedure
@@ -304,8 +304,8 @@ private:
         procedure.subProcedures.push_back(std::move(subProcedure));
         path.push_back(&procedure.subProcedures.back());
         Block();
-        path.pop_back();
         code.emplace_back(ILInstType::OPR, 0, static_cast<int>(ILInstOprType::Ret));
+        path.pop_back();
 
         if (TryMatch(TokenKind::Semi))
         {
@@ -313,6 +313,7 @@ private:
         }
     }
 
+    // <body> -> begin <statement>{;<statement>}end
     void Body()
     {
         Match(TokenKind::Begin);
@@ -409,6 +410,7 @@ private:
                             tkProcedureName.String() + "过程参数个数不匹配");
                     }
                     code.emplace_back(ILInstType::CAL, 1, procedure.codeAddress);
+                    code.emplace_back(ILInstType::INT, 0, -(int)paramsCount);
                 }
                 else if (const auto it = std::ranges::find_if(
                     procedure.subProcedures,
@@ -424,6 +426,7 @@ private:
                             tkProcedureName.String() + "过程参数个数不匹配");
                     }
                     code.emplace_back(ILInstType::CAL, 0, it->codeAddress);
+                    code.emplace_back(ILInstType::INT, 0, -(int)paramsCount);
                 }
                 else
                 {
