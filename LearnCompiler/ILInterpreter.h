@@ -1,15 +1,18 @@
 ﻿#pragma once
+#include <iostream>
+#include <stdexcept>
 #include <vector>
 #include "ILInst.h"
+#include "ILInstOprType.h"
 
 class ILInterpreter
 {
 private:
     ILInst I {ILInstType::LIT, 0, 0}; // 指令寄存器I: 存放当前要执行的代码
     // int T = 0; // 栈顶指示器寄存器T：指向数据栈STACK的栈顶的下一个元素
-    int B = 0; // 基地址寄存器B：存放当前运行过程的数据区在STACK中的起始地址
-    int ip = 0; // 程序地址寄存器P：存放下一条要执行的指令地址
-    std::vector<int> stk;
+    int32_t rbp = 0; // 基地址寄存器B：存放当前运行过程的数据区在STACK中的起始地址
+    int32_t rip = 0; // 程序地址寄存器P：存放下一条要执行的指令地址
+    std::vector<int32_t> stk;
 
 public:
     ILInterpreter()
@@ -21,11 +24,11 @@ public:
     {
         stk.clear();
         // T = 0;
-        B = 0;
-        ip = 0;
-        while (ip != code.size())
+        rbp = 0;
+        rip = 0;
+        while (rip != code.size())
         {
-            FetchOP(code);
+            Fetch(code);
             switch (I.F)
             {
             case ILInstType::LIT:
@@ -34,43 +37,169 @@ public:
                     break;
                 }
             case ILInstType::OPR:
-                break;
+                {
+                    HandleOpr();
+                    break;
+                }
             case ILInstType::LOD:
                 {
+                    stk.push_back(stk[GetSL() + I.A]);
                     break;
                 }
             case ILInstType::STO:
-                break;
+                {
+                    stk[GetSL() + I.A] = stk.back();
+                    stk.pop_back();
+                    break;
+                }
             case ILInstType::CAL:
+                {
+                    stk.push_back(GetSL());
+                    stk.push_back(rip);
+                    stk.push_back(rbp);
+                    rbp = stk.size();
+                }
                 break;
             case ILInstType::INT:
-                break;
+                {
+                    stk.resize(stk.size() + I.A);
+                    break;
+                }
             case ILInstType::JMP:
                 {
-                    ip = I.A;
+                    rip = I.A;
                     break;
                 }
             case ILInstType::JPC:
                 {
                     if (stk.back() == 0)
                     {
-                        ip = I.A;
+                        rip = I.A;
                     }
                     stk.pop_back();
                     break;
                 }
             case ILInstType::RED:
-                break;
+                {
+                    std::cin >> stk[GetSL() + I.A];
+                    break;
+                }
             case ILInstType::WRT:
-                break;
+                {
+                    std::cout << stk.back() << '\n';
+                    stk.pop_back();
+                    break;
+                }
             }
         }
     }
 
 private:
-    void FetchOP(const std::vector<ILInst>& code)
+    int32_t GetSL() const
     {
-        I = code[ip];
-        ip++;
+        int32_t p = rbp;
+        int l = I.L;
+        while (l > 0)
+        {
+            p = stk[p - 3];
+            l--;
+        }
+        return p;
+    }
+
+    void HandleOpr()
+    {
+        switch (static_cast<ILInstOprType>(I.A))
+        {
+        case ILInstOprType::Ret:
+            {
+                rbp = stk.back();
+                stk.pop_back();
+                rip = stk.back();
+                stk.pop_back();
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::Neg:
+            {
+                stk.back() = -stk.back();
+                break;
+            }
+        case ILInstOprType::Odd:
+            {
+                stk.back() = stk.back() % 2 == 1;
+                break;
+            }
+        case ILInstOprType::Add:
+            {
+                stk[stk.size() - 2] += stk.back();
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::Sub:
+            {
+                stk[stk.size() - 2] -= stk.back();
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::Mul:
+            {
+                stk[stk.size() - 2] *= stk.back();
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::Div:
+            {
+                stk[stk.size() - 2] /= stk.back();
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::Eql:
+            {
+                stk[stk.size() - 2] = (stk[stk.size() - 2] == stk.back());
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::Neq:
+            {
+                stk[stk.size() - 2] = (stk[stk.size() - 2] != stk.back());
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::Lss:
+            {
+                stk[stk.size() - 2] = (stk[stk.size() - 2] < stk.back());
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::Leq:
+            {
+                stk[stk.size() - 2] = (stk[stk.size() - 2] <= stk.back());
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::Gtr:
+            {
+                stk[stk.size() - 2] = (stk[stk.size() - 2] > stk.back());
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::Geq:
+            {
+                stk[stk.size() - 2] = (stk[stk.size() - 2] >= stk.back());
+                stk.pop_back();
+                break;
+            }
+        default:
+            {
+                throw std::runtime_error("Unknown ILInstOprType");
+            }
+        }
+    }
+
+    void Fetch(const std::vector<ILInst>& code)
+    {
+        I = code[rip];
+        rip++;
     }
 };
