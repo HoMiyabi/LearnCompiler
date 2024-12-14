@@ -74,14 +74,15 @@ public:
     bool Parse()
     {
         token = tokenizer.GetToken();
-        try
-        {
-            Prog();
-        }
-        catch (const std::exception& e)
-        {
-            std::cout << e.what() << '\n';
-        }
+        Prog();
+        // try
+        // {
+        //     Prog();
+        // }
+        // catch (const std::exception& e)
+        // {
+        //     std::cout << e.what() << '\n';
+        // }
         return true;
     }
 

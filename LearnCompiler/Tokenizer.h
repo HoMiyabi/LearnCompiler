@@ -20,6 +20,7 @@ public:
     explicit Tokenizer(std::string text): text(std::move(text))
     {
         iterator = this->text.begin();
+        ProcessBOM();
     }
 
     std::optional<Token> GetToken()
@@ -54,8 +55,13 @@ public:
     }
 
 private:
-    std::unordered_set<std::string> identifiers;
-    std::unordered_set<int> consts;
+    void ProcessBOM()
+    {
+        if (text.size() >= 3 && text[0] == '\xEF' && text[1] == '\xBB' && text[2] == '\xBF')
+        {
+            iterator = text.begin() + 3;
+        }
+    }
 
     char Current() const
     {
@@ -101,7 +107,6 @@ private:
             return {location, it->second};
         }
 
-        identifiers.insert(tokenStr);
         return {location, TokenKind::Identifier, tokenStr};
     }
 
@@ -129,7 +134,6 @@ private:
         {
             throw std::runtime_error(GetErrorPrefix(location) + "数字" + tokenStr + "超出范围");
         }
-        consts.insert(value);
 
         return {location, TokenKind::Int, value};
     }

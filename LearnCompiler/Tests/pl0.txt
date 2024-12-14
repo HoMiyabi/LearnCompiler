@@ -1,5 +1,5 @@
 ﻿program krrlangtest;
-const max := 100
+var max
 
 procedure sum(a, b);
 var i, sum
@@ -15,5 +15,6 @@ begin
 end
 
 begin
+    read(max);
     call sum(1, max)
 end
