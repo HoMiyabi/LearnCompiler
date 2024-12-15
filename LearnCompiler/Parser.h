@@ -59,8 +59,6 @@ private:
 
     int32_t level = 0;
 
-    // ProcedureInfo program;
-
     std::vector<ProcedureInfo*> path;
 
 public:
@@ -71,19 +69,10 @@ public:
     {
     }
 
-    bool Parse()
+    void Parse()
     {
         token = tokenizer.GetToken();
         Prog();
-        // try
-        // {
-        //     Prog();
-        // }
-        // catch (const std::exception& e)
-        // {
-        //     std::cout << e.what() << '\n';
-        // }
-        return true;
     }
 
 private:
@@ -561,17 +550,9 @@ private:
         }
         while (token && (token->kind == TokenKind::Minus || token->kind == TokenKind::Plus))
         {
-            Token tkOp = *token;
-            MoveNext();
+            auto inst = Aop();
             Term();
-            if (tkOp.kind == TokenKind::Minus)
-            {
-                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Sub));
-            }
-            else
-            {
-                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Add));
-            }
+            code.push_back(inst);
         }
     }
 
@@ -582,16 +563,9 @@ private:
         Factor();
         while (token && (token->kind == TokenKind::Star || token->kind == TokenKind::Slash))
         {
-            auto tkOp = *token;
+            auto inst = Mop();
             Factor();
-            if (tkOp.kind == TokenKind::Star)
-            {
-                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Mul));
-            }
-            else
-            {
-                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Div));
-            }
+            code.push_back(inst);
         }
     }
 
@@ -649,6 +623,40 @@ private:
                 throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "Lop 错误");
             }
         }
+    }
+
+    // <aop> -> +|-
+    ILInst Aop()
+    {
+        const auto tk = Current("+或-");
+        if (tk.kind == TokenKind::Plus)
+        {
+            MoveNext();
+            return {ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Add)};
+        }
+        if (tk.kind == TokenKind::Minus)
+        {
+            MoveNext();
+            return {ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Sub)};
+        }
+        throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "Aop 错误");
+    }
+
+    // <mop> -> *|/
+    ILInst Mop()
+    {
+        const auto tk = Current("*或/");
+        if (tk.kind == TokenKind::Star)
+        {
+            MoveNext();
+            return {ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Mul)};
+        }
+        if (tk.kind == TokenKind::Slash)
+        {
+            MoveNext();
+            return {ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Div)};
+        }
+        throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "Mop 错误");
     }
 
     std::optional<VarInfo> FindVar(const std::string& name, int* pL)

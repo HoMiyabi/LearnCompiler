@@ -17,7 +17,17 @@ int main(int argc, char* argv[])
 
     Tokenizer tokenizer(std::move(text));
     Parser parser(tokenizer);
-    parser.Parse();
+
+    // parser.Parse();
+    try
+    {
+        parser.Parse();
+    }
+    catch (const std::exception& e)
+    {
+        std::cout << e.what() << '\n';
+        return 0;
+    }
 
     auto& code = parser.code;
     for (const auto& inst : code)
