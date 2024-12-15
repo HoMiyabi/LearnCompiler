@@ -1,6 +1,5 @@
 ﻿program fibtest;
-
-var ans, x
+var ans, x;
 
     procedure fib(n): i32
     begin

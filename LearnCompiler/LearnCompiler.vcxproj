@@ -187,6 +187,7 @@
     <ClInclude Include="TokenKind.h" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Tests\factorial.pl0" />
     <Content Include="Tests\fib.pl0" />
     <Content Include="Tests\hello.pas" />
     <Content Include="Tests\outvar.pl0" />

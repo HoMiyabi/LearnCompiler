@@ -195,6 +195,7 @@ private:
         }
     }
 
+    // <condecl> -> const <const>{,<const>};
     void Condecl()
     {
         Match(TokenKind::Const);
@@ -202,8 +203,10 @@ private:
         {
             Const();
         } while (TryMatch(TokenKind::Comma));
+        Match(TokenKind::Semi);
     }
 
+    // <const> -> <id> := <integer>
     void Const()
     {
         ProcedureInfo& procedure = *path.back();
@@ -221,6 +224,7 @@ private:
         procedure.vars.back().value = tkInt.Int32();
     }
 
+    // <vardecl> -> var <id>{,<id>};
     void Vardecl()
     {
         ProcedureInfo& procedure = *path.back();
@@ -236,6 +240,7 @@ private:
             }
             procedure.vars.emplace_back(VarAttribute::Var, VarType::I32, tkId.String(), procedure.vars.size());
         } while (TryMatch(TokenKind::Comma));
+        Match(TokenKind::Semi);
     }
 
     bool static ProcedureContainsVar(const ProcedureInfo& procedure, const std::string& name)
@@ -321,8 +326,8 @@ private:
 
     ProcedureInfo& GetProcedure(const Token& tk, int* pL)
     {
-        // 调用直接子过程
         int l = 0;
+        // 逆序遍历匹配过程path上的所有过程的子过程，所以program自己不会被匹配
         for (auto it = path.rbegin(); it != path.rend(); ++it)
         {
             ProcedureInfo* procedure = *it;

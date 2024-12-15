@@ -13,7 +13,8 @@ int main(int argc, char* argv[])
         std::cout << "请输入文件名\n";
         return 0;
     }
-    auto text = ReadFile(argv[1]);
+    std::string fileName(argv[1]);
+    auto text = ReadFile(fileName);
 
     Tokenizer tokenizer(std::move(text));
     Parser parser(tokenizer);

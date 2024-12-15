@@ -1,0 +1,15 @@
+﻿program fact;
+var n;
+
+    procedure factorial(n): i32
+    begin
+        if n = 0 then
+            return 1;
+        else
+            return n * factorial(n - 1);
+    end
+
+begin
+    read(n);
+    write(factorial(n));
+end

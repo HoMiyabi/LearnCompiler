@@ -1,8 +1,8 @@
 ﻿program outvar;
-var l0a
+var l0a;
 
     procedure l1()
-    var l1a
+    var l1a;
 
         procedure l2()
         begin
