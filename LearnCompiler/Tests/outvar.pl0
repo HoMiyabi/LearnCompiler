@@ -15,16 +15,16 @@ var l0a
         begin
             l0a := 514;
             l1a := 1919;
-            call l1();
+            l1();
         end
         else
         begin
             l1a := 810;
-            call l2();
-        end;
+            l2();
+        end
     end
 
 begin
     l0a := 114;
-    call l1();
+    l1();
 end

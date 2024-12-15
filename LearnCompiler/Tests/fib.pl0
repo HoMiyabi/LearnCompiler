@@ -1,6 +1,6 @@
 ﻿program fibtest;
-const x := 20
-var ans
+
+var ans, x
 
     procedure fib(n): i32
     begin
@@ -16,6 +16,7 @@ var ans
     end
 
 begin
+    read(x);
     ans := fib(x);
     write(ans);
 end
