@@ -188,6 +188,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tests\hello.pas" />
+    <Content Include="Tests\outvar.pl0" />
     <Content Include="Tests\pl0.txt" />
     <Content Include="Tests\refer_code.il" />
     <Content Include="Tests\refer_code.krr" />

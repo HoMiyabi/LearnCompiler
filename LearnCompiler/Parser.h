@@ -250,7 +250,7 @@ private:
         return false;
     }
 
-    // Procedure
+    // <proc> -> procedure <id> ([<id>{,<id>}]) <block> {;<proc>}
     void Proc()
     {
         ProcedureInfo& procedure = *path.back();
@@ -289,7 +289,6 @@ private:
         }
 
         Match(TokenKind::RParen);
-        Match(TokenKind::Semi);
 
         procedure.subProcedures.push_back(std::move(subProcedure));
         path.push_back(&procedure.subProcedures.back());
@@ -303,16 +302,15 @@ private:
         }
     }
 
-    // <body> -> begin <statement>{;<statement>}end
+    // <body> -> begin <statement>;{<statement>;} end
     void Body()
     {
         Match(TokenKind::Begin);
-        Statement();
-        while (TryMatch(TokenKind::Semi))
+        do
         {
             Statement();
-        }
-        Match(TokenKind::End);
+            Match(TokenKind::Semi);
+        } while (!TryMatch(TokenKind::End));
     }
 
     void Statement()
@@ -400,7 +398,10 @@ private:
                             tkProcedureName.String() + "过程参数个数不匹配");
                     }
                     code.emplace_back(ILInstType::CAL, 1, procedure.codeAddress);
-                    code.emplace_back(ILInstType::INT, 0, -(int)paramsCount);
+                    if (paramsCount != 0)
+                    {
+                        code.emplace_back(ILInstType::INT, 0, -static_cast<int>(paramsCount));
+                    }
                 }
                 else if (const auto it = std::ranges::find_if(
                     procedure.subProcedures,
@@ -416,7 +417,10 @@ private:
                             tkProcedureName.String() + "过程参数个数不匹配");
                     }
                     code.emplace_back(ILInstType::CAL, 0, it->codeAddress);
-                    code.emplace_back(ILInstType::INT, 0, -(int)paramsCount);
+                    if (paramsCount != 0)
+                    {
+                        code.emplace_back(ILInstType::INT, 0, -static_cast<int>(paramsCount));
+                    }
                 }
                 else
                 {

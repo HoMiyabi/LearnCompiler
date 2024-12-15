@@ -1,0 +1,30 @@
+﻿program outvar;
+var l0a
+
+    procedure l1()
+    var l1a
+
+        procedure l2()
+        begin
+            write(l0a);
+            write(l1a);
+        end
+
+    begin
+        if l0a = 114 then
+        begin
+            l0a := 514;
+            l1a := 1919;
+            call l1();
+        end
+        else
+        begin
+            l1a := 810;
+            call l2();
+        end;
+    end
+
+begin
+    l0a := 114;
+    call l1();
+end

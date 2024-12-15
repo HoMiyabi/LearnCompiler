@@ -30,9 +30,9 @@ int main(int argc, char* argv[])
     }
 
     auto& code = parser.code;
-    for (const auto& inst : code)
+    for (size_t i = 0; i < code.size(); i++)
     {
-        std::cout << inst.ToString() << '\n';
+        std::cout << i << ": " << code[i].ToString() << '\n';
     }
     ILInterpreter().Interpret(code);
 
