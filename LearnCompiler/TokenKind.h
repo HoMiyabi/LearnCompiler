@@ -23,6 +23,10 @@ enum class TokenKind
     Read,
     Write,
     Program,
+    Return,
+
+    // 类型关键字
+    I32,
 
     // 标点符
     //  运算符
@@ -42,13 +46,12 @@ enum class TokenKind
     //  括号
     LParen,
     RParen,
-    LBrace,
-    RBrace,
 
     //  分隔符
-    Semi,
-    Comma,
-    ColonEqual,
+    Semi, // ;
+    Comma, // ,
+    Colon, // :
+    ColonEqual, // :=
 };
 
 inline const std::unordered_map<std::string_view, TokenKind> keywordSpellingToTokenKind
@@ -68,6 +71,8 @@ inline const std::unordered_map<std::string_view, TokenKind> keywordSpellingToTo
     {"read", TokenKind::Read},
     {"write", TokenKind::Write},
     {"program", TokenKind::Program},
+    {"return", TokenKind::Return},
+    {"i32", TokenKind::I32},
 };
 
 // 同时表示没有他们开头的其他长标点符
@@ -82,8 +87,6 @@ inline const std::unordered_map<char, TokenKind> singlePunctuatorSpellingToToken
 
     {'(', TokenKind::LParen},
     {')', TokenKind::RParen},
-    {'{', TokenKind::LBrace},
-    {'}', TokenKind::RBrace},
 
     {';', TokenKind::Semi},
     {',', TokenKind::Comma},
@@ -105,11 +108,10 @@ inline const std::unordered_map<std::string_view, TokenKind> punctuatorSpellingT
 
     {"(", TokenKind::LParen},
     {")", TokenKind::RParen},
-    {"{", TokenKind::LBrace},
-    {"}", TokenKind::RBrace},
 
     {";", TokenKind::Semi},
     {",", TokenKind::Comma},
+    {":", TokenKind::Colon},
     {":=", TokenKind::ColonEqual},
 };
 
@@ -124,8 +126,6 @@ inline const std::unordered_set<char> startingPunctuators
     '>',
     '(',
     ')',
-    '{',
-    '}',
     ';',
     ',',
     ':',

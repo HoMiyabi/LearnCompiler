@@ -1,0 +1,21 @@
+﻿program fibtest;
+const x := 20
+var ans
+
+    procedure fib(n): i32
+    begin
+        if n = 1 then
+        begin
+            return 1;
+        end
+        if n = 2 then
+        begin
+            return 1;
+        end
+        return fib(n - 1) + fib(n - 2);
+    end
+
+begin
+    ans := fib(x);
+    write(ans);
+end

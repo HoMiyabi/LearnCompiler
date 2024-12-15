@@ -187,6 +187,7 @@
     <ClInclude Include="TokenKind.h" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Tests\fib.pl0" />
     <Content Include="Tests\hello.pas" />
     <Content Include="Tests\outvar.pl0" />
     <Content Include="Tests\pl0.txt" />
@@ -195,7 +196,6 @@
     <Content Include="Tests\test.txt" />
     <Content Include="Tests\test_literial.txt" />
     <Content Include="Tests\test_punctuator.txt" />
-    <Content Include="TokenKind.def.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

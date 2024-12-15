@@ -5,50 +5,55 @@
 #include "ILInstOprType.h"
 #include "Tokenizer.h"
 
-enum class VarType
+enum class VarAttribute
 {
     Const,
     Var,
 };
 
+enum class VarType
+{
+    Void,
+    I32,
+};
+
 class VarInfo
 {
 public:
-    VarType type;
+    VarAttribute attribute;
+    VarType type = VarType::Void;
     std::string name;
     int32_t runtimeAddress;
     int32_t value = 0;
 
-    explicit VarInfo(VarType type, std::string name, int32_t runtimeAddress):
+    explicit VarInfo(VarAttribute attribute, VarType type, std::string name, int32_t runtimeAddress):
+    attribute(attribute),
     type(type),
     name(std::move(name)),
     runtimeAddress(runtimeAddress)
     {
     }
+
+    VarInfo() = default;
 };
 
 class ProcedureInfo
 {
 public:
-    ProcedureInfo* parent = nullptr;
-
     int32_t codeAddress = 0;
-    int32_t level = 0;
 
     std::string name;
+    VarInfo ret{};
     std::vector<VarInfo> params;
 
     std::vector<VarInfo> vars;
     std::vector<ProcedureInfo> subProcedures;
 
-    ProcedureInfo(int32_t codeAddress, int32_t level, std::string name):
+    ProcedureInfo(int32_t codeAddress, std::string name):
     codeAddress(codeAddress),
-    level(level),
     name(std::move(name))
     {
     }
-
-    ProcedureInfo() = default;
 };
 
 class Parser
@@ -56,8 +61,6 @@ class Parser
 private:
     Tokenizer& tokenizer;
     std::optional<Token> token;
-
-    int32_t level = 0;
 
     std::vector<ProcedureInfo*> path;
 
@@ -149,7 +152,7 @@ private:
         Token tkName = Match(TokenKind::Identifier);
         Match(TokenKind::Semi);
 
-        auto program = ProcedureInfo(0, level++, tkName.String());
+        auto program = ProcedureInfo(0, tkName.String());
         path.push_back(&program);
         Block();
         path.pop_back();
@@ -172,7 +175,7 @@ private:
         {
             code.emplace_back(ILInstType::INT, 0, procedure->vars.size());
         }
-        for (auto it = procedure->vars.begin(); it != procedure->vars.end() && it->type == VarType::Const; ++it)
+        for (auto it = procedure->vars.begin(); it != procedure->vars.end() && it->attribute == VarAttribute::Const; ++it)
         {
             code.emplace_back(ILInstType::LIT, 0, it->value);
             code.emplace_back(ILInstType::STO, 0, it->runtimeAddress);
@@ -214,7 +217,7 @@ private:
             throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() + "重复定义");
         }
 
-        procedure.vars.emplace_back(VarType::Const, tkId.String(), procedure.vars.size());
+        procedure.vars.emplace_back(VarAttribute::Const, VarType::I32, tkId.String(), procedure.vars.size());
         procedure.vars.back().value = tkInt.Int32();
     }
 
@@ -231,7 +234,7 @@ private:
             {
                 throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() + "重复定义");
             }
-            procedure.vars.emplace_back(VarType::Var, tkId.String(), procedure.vars.size());
+            procedure.vars.emplace_back(VarAttribute::Var, VarType::I32, tkId.String(), procedure.vars.size());
         } while (TryMatch(TokenKind::Comma));
     }
 
@@ -250,7 +253,7 @@ private:
         return false;
     }
 
-    // <proc> -> procedure <id> ([<id>{,<id>}]) <block> {;<proc>}
+    // <proc> -> procedure <id> ([<id>{,<id>}]) [: id] <block> {;<proc>}
     void Proc()
     {
         ProcedureInfo& procedure = *path.back();
@@ -269,8 +272,6 @@ private:
 
         Match(TokenKind::LParen);
 
-        ProcedureInfo subProcedure(code.size(), level++, tkName.String());
-
         std::vector<Token> tkParams;
 
         if (auto tkParam = TryMatch(TokenKind::Identifier))
@@ -282,13 +283,19 @@ private:
             }
         }
 
+        ProcedureInfo subProcedure(code.size(),tkName.String());
         for (int i = 0; i < tkParams.size(); i++)
         {
             // 最后一个参数位于-4
-            subProcedure.params.emplace_back(VarType::Var, tkParams[i].String(), i - tkParams.size() - 3);
+            subProcedure.params.emplace_back(VarAttribute::Var, VarType::I32, tkParams[i].String(), i - tkParams.size() - 3);
         }
 
         Match(TokenKind::RParen);
+        if (TryMatch(TokenKind::Colon))
+        {
+            auto tkRetType = Match(TokenKind::I32);
+            subProcedure.ret = VarInfo(VarAttribute::Var, VarType::I32, "", -static_cast<int>(tkParams.size()) - 4);
+        }
 
         procedure.subProcedures.push_back(std::move(subProcedure));
         path.push_back(&procedure.subProcedures.back());
@@ -302,181 +309,219 @@ private:
         }
     }
 
-    // <body> -> begin <statement>;{<statement>;} end
+    // <body> -> begin <statement>{<statement>} end
     void Body()
     {
         Match(TokenKind::Begin);
         do
         {
             Statement();
-            Match(TokenKind::Semi);
         } while (!TryMatch(TokenKind::End));
     }
 
+    ProcedureInfo& GetProcedure(const Token& tk, int* pL)
+    {
+        // 调用直接子过程
+        int l = 0;
+        for (auto it = path.rbegin(); it != path.rend(); ++it)
+        {
+            ProcedureInfo* procedure = *it;
+            if (const auto it1 = std::ranges::find_if(
+                    procedure->subProcedures,
+                    [&](auto& subProcedure)
+                    {
+                        return subProcedure.name == tk.String();
+                    });
+                it1 != procedure->subProcedures.end())
+            {
+                *pL = l;
+                return *it1;
+            }
+            l++;
+        }
+        throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + tk.String() + "过程未定义");
+    }
+
+    // <CallProcedure> -> <id>([<exp>{,<exp>}])
+    // 此处已经匹配完(
+    void CallProcedure(const Token& tkId, bool needRet)
+    {
+        int l;
+        ProcedureInfo& target = GetProcedure(tkId, &l);
+        int reserveForRet;
+        if (target.ret.type == VarType::Void)
+        {
+            reserveForRet = 0;
+            if (needRet)
+            {
+                throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() + "过程需要返回值");
+            }
+        }
+        else
+        {
+            reserveForRet = 1;
+            code.emplace_back(ILInstType::INT, 0, 1);
+        }
+
+        size_t paramsCount = 0;
+        if (!TryMatch(TokenKind::RParen))
+        {
+            do
+            {
+                Exp();
+                paramsCount++;
+            } while (TryMatch(TokenKind::Comma));
+            Match(TokenKind::RParen);
+        }
+
+        if (paramsCount != target.params.size())
+        {
+            throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() +
+                "过程参数个数不匹配");
+        }
+        code.emplace_back(ILInstType::CAL, l, target.codeAddress);
+
+        if (needRet)
+        {
+            if (paramsCount != 0)
+            {
+                code.emplace_back(ILInstType::INT, 0, -static_cast<int>(paramsCount));
+            }
+        }
+        else
+        {
+            if ((reserveForRet + paramsCount) != 0)
+            {
+                code.emplace_back(ILInstType::INT, 0, -static_cast<int>(reserveForRet + paramsCount));
+            }
+        }
+    }
+
+/*
+<statement> ->  <id> := <exp>;
+               |<CallProcedure>;
+               |if <lexp> then <statement>[else <statement>]
+               |while <lexp> do <statement>
+               |<body>
+               |read (<id>{，<id>});
+               |write (<exp>{,<exp>});
+               |return [<exp>];
+*/
     void Statement()
     {
         ProcedureInfo& procedure = *path.back();
 
-        switch (Current().kind)
+        Token tk = Current("statement");
+        if (tk.kind == TokenKind::Identifier)
         {
-        case TokenKind::Identifier:
+            MoveNext();
+            if (TryMatch(TokenKind::ColonEqual))
             {
-                Token tkId = Match(TokenKind::Identifier);
                 int l;
-                auto varInfo = FindVar(tkId.String(), &l);
-                if (!varInfo)
-                {
-                    throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() + "找不到");
-                }
-                Match(TokenKind::ColonEqual);
+                auto varInfo = FindVar(tk, &l);
                 Exp();
-                code.emplace_back(ILInstType::STO, l, varInfo->runtimeAddress);
-                break;
+                code.emplace_back(ILInstType::STO, l, varInfo.runtimeAddress);
+                Match(TokenKind::Semi);
             }
-        case TokenKind::If:
+            else if (TryMatch(TokenKind::LParen))
             {
-                Match(TokenKind::If);
-                Lexp();
-                code.emplace_back(ILInstType::JPC, 0, 0);
-                int jpcIdx = code.size() - 1;
-                Match(TokenKind::Then);
-                Statement();
-                if (TryMatch(TokenKind::Else))
-                {
-                    code.emplace_back(ILInstType::JMP, 0, 0);
-                    int jmpIdx = code.size() - 1;
-                    code[jpcIdx].A = code.size();
-                    Statement();
-                    code[jmpIdx].A = code.size();
-                }
-                else
-                {
-                    code[jpcIdx].A = code.size();
-                }
-                break;
+                CallProcedure(tk, false);
+                Match(TokenKind::Semi);
             }
-        case TokenKind::While:
+            else
             {
-                Match(TokenKind::While);
-                int whileStart = code.size();
-                Lexp();
-                code.emplace_back(ILInstType::JPC, 0, 0);
-                int jpcIdx = code.size() - 1;
-                Match(TokenKind::Do);
-                Statement();
-                code.emplace_back(ILInstType::JMP, 0, whileStart);
-                code[jpcIdx].A = code.size();
-                break;
-            }
-            // call <id>([<exp>{,<exp>}])
-        case TokenKind::Call:
-            {
-                // 过程允许调用自身、同级过程和直接子过程，在此处两者都被解析完了
-                Match(TokenKind::Call);
-                Token tkProcedureName = Match(TokenKind::Identifier);
-
-                size_t paramsCount = 0;
-                Match(TokenKind::LParen);
-                if (!TryMatch(TokenKind::RParen))
-                {
-                    Exp();
-                    paramsCount++;
-                    while (TryMatch(TokenKind::Comma))
-                    {
-                        Exp();
-                        paramsCount++;
-                    }
-                    Match(TokenKind::RParen);
-                }
-
-                if (procedure.name == tkProcedureName.String())
-                {
-                    // 调用自身
-                    if (paramsCount != procedure.params.size())
-                    {
-                        throw std::runtime_error(GetErrorPrefix(tkProcedureName.fileLocation) +
-                            tkProcedureName.String() + "过程参数个数不匹配");
-                    }
-                    code.emplace_back(ILInstType::CAL, 1, procedure.codeAddress);
-                    if (paramsCount != 0)
-                    {
-                        code.emplace_back(ILInstType::INT, 0, -static_cast<int>(paramsCount));
-                    }
-                }
-                else if (const auto it = std::ranges::find_if(
-                    procedure.subProcedures,
-                    [&](auto& subProcedure) {
-                        return subProcedure.name == tkProcedureName.String();
-                    });
-                    it != procedure.subProcedures.end())
-                {
-                    // 调用直接子过程
-                    if (paramsCount != it->params.size())
-                    {
-                        throw std::runtime_error(GetErrorPrefix(tkProcedureName.fileLocation) +
-                            tkProcedureName.String() + "过程参数个数不匹配");
-                    }
-                    code.emplace_back(ILInstType::CAL, 0, it->codeAddress);
-                    if (paramsCount != 0)
-                    {
-                        code.emplace_back(ILInstType::INT, 0, -static_cast<int>(paramsCount));
-                    }
-                }
-                else
-                {
-                    // 调用同级过程没处理
-                    throw std::runtime_error(GetErrorPrefix(tkProcedureName.fileLocation) +
-                        tkProcedureName.String() + "过程未定义");
-                }
-
-                break;
-            }
-        case TokenKind::Begin:
-            {
-                Body();
-                break;
-            }
-        case TokenKind::Read:
-            {
-                Match(TokenKind::Read);
-                Match(TokenKind::LParen);
-                do
-                {
-                    auto tk = Match(TokenKind::Identifier);
-
-                    int l;
-                    if (auto varInfo = FindVar(tk.String(), &l))
-                    {
-                        code.emplace_back(ILInstType::RED, l, varInfo->runtimeAddress);
-                    }
-                    else
-                    {
-                        throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + tk.String() + "未定义");
-                    }
-                } while (TryMatch(TokenKind::Comma));
-
-                Match(TokenKind::RParen);
-                break;
-            }
-        case TokenKind::Write:
-            {
-                Match(TokenKind::Write);
-                Match(TokenKind::LParen);
-                Exp();
-                code.emplace_back(ILInstType::WRT, 0, 0);
-                while (TryMatch(TokenKind::Comma))
-                {
-                    Exp();
-                    code.emplace_back(ILInstType::WRT, 0, 0);
-                }
-                Match(TokenKind::RParen);
-                break;
-            }
-        default:
-            {
-                throw std::runtime_error(GetErrorPrefix(Current().fileLocation) + "Statement 错误");
+                throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "必须为:=或(");
             }
         }
+        else if (tk.kind == TokenKind::If)
+        {
+            MoveNext();
+            Lexp();
+            code.emplace_back(ILInstType::JPC, 0, 0);
+            int jpcIdx = code.size() - 1;
+            Match(TokenKind::Then);
+            Statement();
+            if (TryMatch(TokenKind::Else))
+            {
+                code.emplace_back(ILInstType::JMP, 0, 0);
+                int jmpIdx = code.size() - 1;
+                code[jpcIdx].A = code.size();
+                Statement();
+                code[jmpIdx].A = code.size();
+            }
+            else
+            {
+                code[jpcIdx].A = code.size();
+            }
+        }
+        else if (tk.kind == TokenKind::While)
+        {
+            MoveNext();
+            int whileStart = code.size();
+            Lexp();
+            code.emplace_back(ILInstType::JPC, 0, 0);
+            int jpcIdx = code.size() - 1;
+            Match(TokenKind::Do);
+            Statement();
+            code.emplace_back(ILInstType::JMP, 0, whileStart);
+            code[jpcIdx].A = code.size();
+        }
+        else if (tk.kind == TokenKind::Begin)
+        {
+            Body();
+        }
+        else if (tk.kind == TokenKind::Read)
+        {
+            MoveNext();
+            Match(TokenKind::LParen);
+            do
+            {
+                auto tkVar = Match(TokenKind::Identifier);
+                int l;
+                auto varInfo = FindVar(tkVar, &l);
+                code.emplace_back(ILInstType::RED, l, varInfo.runtimeAddress);
+            } while (TryMatch(TokenKind::Comma));
+            Match(TokenKind::RParen);
+            Match(TokenKind::Semi);
+        }
+        else if (tk.kind == TokenKind::Write)
+        {
+            MoveNext();
+            Match(TokenKind::LParen);
+            Exp();
+            code.emplace_back(ILInstType::WRT, 0, 0);
+            while (TryMatch(TokenKind::Comma))
+            {
+                Exp();
+                code.emplace_back(ILInstType::WRT, 0, 0);
+            }
+            Match(TokenKind::RParen);
+            Match(TokenKind::Semi);
+        }
+        else if (tk.kind == TokenKind::Return)
+        {
+            MoveNext();
+            if (TryMatch(TokenKind::Semi))
+            {
+                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Ret));
+            }
+            else
+            {
+                if (procedure.ret.type == VarType::Void)
+                {
+                    throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "过程没有返回值");
+                }
+                Exp();
+                Match(TokenKind::Semi);
+                code.emplace_back(ILInstType::STO, 0, procedure.ret.runtimeAddress);
+                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Ret));
+            }
+        }
+        else
+        {
+            throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "Statement错误");
+        }
+
     }
 
     // <lexp> → <exp> <lop> <exp>|odd <exp>
@@ -573,7 +618,10 @@ private:
         }
     }
 
-    // <factor> -> <id>|<integer>|(<exp>)
+    // <factor> -> <id> |
+    //             <CallProcedure> |
+    //             <integer> |
+    //             (<exp>)
     // factor.first = id, int, (
     void Factor()
     {
@@ -581,14 +629,15 @@ private:
 
         if (auto tk = TryMatch(TokenKind::Identifier))
         {
-            int l;
-            if (auto varInfo = FindVar(tk->String(), &l))
+            if (TryMatch(TokenKind::LParen))
             {
-                code.emplace_back(ILInstType::LOD, l, varInfo->runtimeAddress);
+                CallProcedure(*tk, true);
             }
             else
             {
-                throw std::runtime_error(GetErrorPrefix(tk->fileLocation) + tk->String() + "未定义");
+                int l;
+                auto varInfo = FindVar(*tk, &l);
+                code.emplace_back(ILInstType::LOD, l, varInfo.runtimeAddress);
             }
         }
         else if (tk = TryMatch(TokenKind::Int);tk)
@@ -663,9 +712,10 @@ private:
         throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "Mop 错误");
     }
 
-    std::optional<VarInfo> FindVar(const std::string& name, int* pL)
+    VarInfo FindVar(const Token& tkVar, int* pL)
     {
         int l = 0;
+        const std::string& name = tkVar.String();
         for (auto procIt = path.rbegin(); procIt != path.rend(); ++procIt)
         {
             const auto& vars = (*procIt)->vars;
@@ -693,6 +743,6 @@ private:
 
             l++;
         }
-        return std::nullopt;
+        throw std::runtime_error(GetErrorPrefix(tkVar.fileLocation) + tkVar.String() + "未定义");
     }
 };

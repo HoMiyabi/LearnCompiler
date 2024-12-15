@@ -184,7 +184,7 @@ private:
                 MoveNext();
                 return {location, TokenKind::ColonEqual};
             }
-            throw std::runtime_error(GetErrorPrefix(location) + "未定义的标点符:");
+            return {location, TokenKind::Colon};
         }
 
         throw std::runtime_error(GetErrorPrefix(location) + "未定义的标点符" + Current());
