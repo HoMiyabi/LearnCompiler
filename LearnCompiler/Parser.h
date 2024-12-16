@@ -347,7 +347,7 @@ private:
         throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + tk.String() + "过程未定义");
     }
 
-    // <CallProcedure> -> <id>([<exp>{,<exp>}])
+    // <CallProcedure> -> <id> ([<exp>{,<exp>}])
     // 此处已经匹配完(
     void CallProcedure(const Token& tkId, bool needRet)
     {
@@ -409,7 +409,7 @@ private:
                |while <lexp> do <statement>
                |<body>
                |read (<id>{，<id>});
-               |write (<exp>{,<exp>});
+               |write (<exp>{, <exp>});
                |return [<exp>];
 */
     void Statement()

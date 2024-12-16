@@ -1,0 +1,28 @@
+﻿<prog> -> program <id>；<block>
+<block> -> [<condecl>][<vardecl>][<proc>]<body>
+<condecl> -> const <const>{,<const>};
+<const> -> <id> := <integer>
+<vardecl> -> var <id>{,<id>};
+<proc> -> procedure <id> ([<id>{,<id>}]) <block> {;<proc>}
+<body> -> begin <statement>{<statement>} end
+<statement> ->  <id> := <exp>;
+               |<CallProcedure>;
+               |if <lexp> then <statement>[else <statement>]
+               |while <lexp> do <statement>
+               |<body>
+               |read (<id>{，<id>});
+               |write (<exp>{, <exp>});
+               |return [<exp>];
+<lexp> -> <exp> <lop> <exp>|odd <exp>
+<exp> -> [+|-]<term>{<aop><term>}
+<term> -> <factor>{<mop><factor>}
+<factor> ->  <id>
+            |<CallProcedure>
+            |<integer>
+            |(<exp>)
+<CallProcedure> -> <id> ([<exp>{,<exp>}])
+<lop> -> =|<>|<|<=|>|>=
+<aop> -> +|-
+<mop> -> *|/
+<id> -> l{l|d}   （注：l表示字母）
+<integer> -> d{d}

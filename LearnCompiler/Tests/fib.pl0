@@ -3,11 +3,11 @@ var ans, x;
 
     procedure fib(n): i32
     begin
-        if n = 1 then
+        if n = 0 then
         begin
-            return 1;
+            return 0;
         end
-        if n = 2 then
+        if n = 1 then
         begin
             return 1;
         end
