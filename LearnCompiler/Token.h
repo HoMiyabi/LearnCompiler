@@ -9,7 +9,7 @@ class Token
 {
 public:
     TokenKind kind;
-    std::variant<std::string, int32_t> value;
+    std::variant<std::string, int32_t, float> value;
     FileLocation fileLocation;
 
     Token() = default;
@@ -18,7 +18,7 @@ public:
     {
     }
 
-    Token(const FileLocation fileLocation, const TokenKind kind, std::variant<std::string, int> value):
+    Token(const FileLocation fileLocation, const TokenKind kind, std::variant<std::string, int, float> value):
     kind(kind), value(std::move(value)), fileLocation(fileLocation)
     {
     }
@@ -35,11 +35,17 @@ public:
         return std::get<int32_t>(value);
     }
 
+    [[nodiscard]]
+    float Float32() const
+    {
+        return std::get<float>(value);
+    }
+
     std::string ToString() const
     {
         std::string text;
         text += magic_enum::enum_name(kind);
-        if (kind == TokenKind::Int)
+        if (kind == TokenKind::Int32)
         {
             text += ' ';
             text += std::to_string(std::get<int32_t>(value));

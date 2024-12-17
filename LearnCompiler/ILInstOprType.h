@@ -15,4 +15,18 @@ enum class ILInstOprType
     Leq, // 次栈顶是否小于等于栈顶，退两个栈元素，结果值进栈
     Gtr, // 次栈顶是否大于栈顶，退两个栈元素，结果值进栈
     Geq, // 次栈顶是否大于等于栈顶，退两个栈元素，结果值进栈
+
+    FNeg,
+    FAdd,
+    FSub,
+    FMul,
+    FDiv,
+    FEql,
+    FNeq,
+    FLss,
+    FLeq,
+    FGtr,
+    FGeq,
+    FToI,
+    IToF,
 };

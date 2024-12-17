@@ -182,9 +182,11 @@
     <ClInclude Include="include\magic_enum\magic_enum_switch.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_utility.hpp" />
     <ClInclude Include="Parser.h" />
+    <ClInclude Include="ProcedureInfo.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="Tokenizer.h" />
     <ClInclude Include="TokenKind.h" />
+    <ClInclude Include="VarInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tests\factorial.pl0" />

@@ -42,7 +42,7 @@ public:
         {
             return HandleKeywordOrIdentifier();
         }
-        if (IsDigit(Current()))
+        if (IsPlusOrMinus(Current()) || IsDigit(Current()))
         {
             return HandleLiteral();
         }
@@ -114,28 +114,50 @@ private:
     {
         const auto location = fileLocation;
 
+        bool bFloat = false;
+
         std::string tokenStr;
         do
         {
+            if (Current() == '.')
+            {
+                bFloat = true;
+            }
             tokenStr.push_back(Current());
             MoveNext();
         } while (!IsEnd() && IsDigit(Current()));
 
-        int value;
+        if (bFloat)
+        {
+            float f;
+            try
+            {
+                f = std::stof(tokenStr);
+            }
+            catch (std::invalid_argument&)
+            {
+                throw std::runtime_error(GetErrorPrefix(location) + "字面量" + tokenStr + "无法被解析");
+            }
+            catch (std::out_of_range&)
+            {
+                throw std::runtime_error(GetErrorPrefix(location) + "字面量" + tokenStr + "超出范围");
+            }
+            return {location, TokenKind::Int32, f};
+        }
+        int i;
         try
         {
-            value = std::stoi(tokenStr);
+            i = std::stoi(tokenStr);
         }
         catch (std::invalid_argument&)
         {
-            throw std::runtime_error(GetErrorPrefix(location) + "数字" + tokenStr + "无法被解析");
+            throw std::runtime_error(GetErrorPrefix(location) + "字面量" + tokenStr + "无法被解析");
         }
         catch (std::out_of_range&)
         {
-            throw std::runtime_error(GetErrorPrefix(location) + "数字" + tokenStr + "超出范围");
+            throw std::runtime_error(GetErrorPrefix(location) + "字面量" + tokenStr + "超出范围");
         }
-
-        return {location, TokenKind::Int, value};
+        return {location, TokenKind::Int32, i};
     }
 
     Token HandlePunctuator()

@@ -1,9 +1,9 @@
 ﻿<prog> -> program <id>；<block>
 <block> -> [<condecl>][<vardecl>][<proc>]<body>
 <condecl> -> const <const>{,<const>};
-<const> -> <id> := <integer>
-<vardecl> -> var <id>{,<id>};
-<proc> -> procedure <id> ([<id>{,<id>}]) <block> {;<proc>}
+<const> -> <id> := <literal>
+<vardecl> -> var <id>:<id>{,<id>:<id>};
+<proc> -> procedure <id> ([<id>:<id>{,<id>:<id>}]) [: <id>] <block> [<proc>]
 <body> -> begin <statement>{<statement>} end
 <statement> ->  <id> := <exp>;
                |<CallProcedure>;
@@ -18,11 +18,17 @@
 <term> -> <factor>{<mop><factor>}
 <factor> ->  <id>
             |<CallProcedure>
-            |<integer>
+            |<literal>
             |(<exp>)
+			|i32 (<exp>)
+			|f32 (<exp>)
 <CallProcedure> -> <id> ([<exp>{,<exp>}])
 <lop> -> =|<>|<|<=|>|>=
 <aop> -> +|-
 <mop> -> *|/
-<id> -> l{l|d}   （注：l表示字母）
-<integer> -> d{d}
+<id> -> l{l|d}
+<literal> -> <int32> | <float32>
+<int32> -> [+|-]d{d}
+<float32> -> [+|-]d{d}.d{d}
+
+l代表字母，d代表数字

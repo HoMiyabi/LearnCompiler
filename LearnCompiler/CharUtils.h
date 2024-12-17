@@ -24,3 +24,8 @@ inline bool IsLetterOrDigit(const char ch)
 {
     return IsLetter(ch) || IsDigit(ch);
 }
+
+inline bool IsPlusOrMinus(const char ch)
+{
+    return ch == '+' || ch == '-';
+}

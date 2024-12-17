@@ -5,7 +5,9 @@
 enum class TokenKind
 {
     Identifier,
-    Int,
+    // 字面量
+    Int32,
+    Float32,
 
     // 关键字
     Begin,
@@ -17,7 +19,6 @@ enum class TokenKind
     Do,
     Var,
     Procedure,
-    Call,
     Const,
     Odd,
     Read,
@@ -27,6 +28,7 @@ enum class TokenKind
 
     // 类型关键字
     I32,
+    F32,
 
     // 标点符
     //  运算符
@@ -65,7 +67,6 @@ inline const std::unordered_map<std::string_view, TokenKind> keywordSpellingToTo
     {"do", TokenKind::Do},
     {"var", TokenKind::Var},
     {"procedure", TokenKind::Procedure},
-    {"call", TokenKind::Call},
     {"const", TokenKind::Const},
     {"odd", TokenKind::Odd},
     {"read", TokenKind::Read},
@@ -73,6 +74,7 @@ inline const std::unordered_map<std::string_view, TokenKind> keywordSpellingToTo
     {"program", TokenKind::Program},
     {"return", TokenKind::Return},
     {"i32", TokenKind::I32},
+    {"f32", TokenKind::F32},
 };
 
 // 同时表示没有他们开头的其他长标点符
