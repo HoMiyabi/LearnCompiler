@@ -29,3 +29,8 @@ inline bool IsPlusOrMinus(const char ch)
 {
     return ch == '+' || ch == '-';
 }
+
+inline bool IsNumeric(const char ch)
+{
+    return IsDigit(ch) || ch == '.';
+}

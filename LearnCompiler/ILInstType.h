@@ -12,4 +12,6 @@ enum class ILInstType
     JPC, // Jump on Condition
     RED, // Read
     WRT, // Write
+    FRED,
+    FWRT
 };

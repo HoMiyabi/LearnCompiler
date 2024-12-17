@@ -29,6 +29,7 @@ public:
         while (rip != code.size())
         {
             Fetch(code);
+            // std::cout << rip - 1 << I.ToString() << std::endl;
             switch (I.F)
             {
             case ILInstType::LIT:
@@ -43,12 +44,12 @@ public:
                 }
             case ILInstType::LOD:
                 {
-                    stk.push_back(stk[GetSL() + I.A]);
+                    stk.push_back(stk.at(GetSL() + I.A));
                     break;
                 }
             case ILInstType::STO:
                 {
-                    stk[GetSL() + I.A] = stk.back();
+                    stk.at(GetSL() + I.A) = stk.back();
                     stk.pop_back();
                     break;
                 }
@@ -82,7 +83,7 @@ public:
                 }
             case ILInstType::RED:
                 {
-                    std::cin >> stk[GetSL() + I.A];
+                    std::cin >> stk.at(GetSL() + I.A);
                     break;
                 }
             case ILInstType::WRT:
@@ -90,6 +91,21 @@ public:
                     std::cout << stk.back() << '\n';
                     stk.pop_back();
                     break;
+                }
+            case ILInstType::FRED:
+                {
+                    std::cin >> FloatAt(GetSL() + I.A);
+                    break;
+                }
+            case ILInstType::FWRT:
+                {
+                    std::cout << FloatBack() << '\n';
+                    stk.pop_back();
+                    break;
+                }
+            default:
+                {
+                    throw std::runtime_error("不能识别的指令" + I.ToString());
                 }
             }
         }
@@ -106,6 +122,16 @@ private:
             l--;
         }
         return p;
+    }
+
+    float& FloatBack()
+    {
+        return *(float*)&stk.back();
+    }
+
+    float& FloatAt(size_t i)
+    {
+        return *(float*)&stk.at(i);
     }
 
     void HandleOpr()
@@ -191,9 +217,84 @@ private:
                 stk.pop_back();
                 break;
             }
+        case ILInstOprType::FNeg:
+            {
+                FloatBack() = -FloatBack();
+                break;
+            }
+        case ILInstOprType::FAdd:
+            {
+                FloatAt(stk.size() - 2) += FloatBack();
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::FSub:
+            {
+                FloatAt(stk.size() - 2) -= FloatBack();
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::FMul:
+            {
+                FloatAt(stk.size() - 2) *= FloatBack();
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::FDiv:
+            {
+                FloatAt(stk.size() - 2) /= FloatBack();
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::FEql:
+            {
+                stk[stk.size() - 2] = (FloatAt(stk.size() - 2) == FloatBack());
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::FNeq:
+            {
+                stk[stk.size() - 2] = (FloatAt(stk.size() - 2) != FloatBack());
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::FLss:
+            {
+                stk[stk.size() - 2] = (FloatAt(stk.size() - 2) < FloatBack());
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::FLeq:
+            {
+                stk[stk.size() - 2] = (FloatAt(stk.size() - 2) <= FloatBack());
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::FGtr:
+            {
+                stk[stk.size() - 2] = (FloatAt(stk.size() - 2) > FloatBack());
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::FGeq:
+            {
+                stk[stk.size() - 2] = (FloatAt(stk.size() - 2) >= FloatBack());
+                stk.pop_back();
+                break;
+            }
+        case ILInstOprType::FToI:
+            {
+                stk[stk.size() - 1] = (int32_t)FloatBack();
+                break;
+            }
+        case ILInstOprType::IToF:
+            {
+                FloatBack() = (float)stk.back();
+                break;
+            }
         default:
             {
-                throw std::runtime_error("Unknown ILInstOprType");
+                throw std::runtime_error("不能识别的Opr" + I.ToString());
             }
         }
     }

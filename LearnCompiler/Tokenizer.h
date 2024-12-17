@@ -42,9 +42,17 @@ public:
         {
             return HandleKeywordOrIdentifier();
         }
-        if (IsPlusOrMinus(Current()) || IsDigit(Current()))
+        if (IsDigit(Current()))
         {
             return HandleLiteral();
+        }
+        if (IsPlusOrMinus(Current()))
+        {
+            auto next = iterator + 1;
+            if (next != text.end() && IsDigit(*next))
+            {
+                return HandleLiteral();
+            }
         }
         if (startingPunctuators.contains(Current()))
         {
@@ -125,7 +133,7 @@ private:
             }
             tokenStr.push_back(Current());
             MoveNext();
-        } while (!IsEnd() && IsDigit(Current()));
+        } while (!IsEnd() && IsNumeric(Current()));
 
         if (bFloat)
         {
@@ -142,7 +150,7 @@ private:
             {
                 throw std::runtime_error(GetErrorPrefix(location) + "字面量" + tokenStr + "超出范围");
             }
-            return {location, TokenKind::Int32, f};
+            return {location, TokenKind::Float32, f};
         }
         int i;
         try

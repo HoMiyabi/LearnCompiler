@@ -1,0 +1,28 @@
+﻿program testf;
+var a: f32;
+
+    procedure abs(x: f32): f32
+    begin
+        if x < 0.0 then
+            return -x;
+        else
+            return x;
+    end
+
+    procedure root(num: f32): f32
+    const epsilon := 0.001;
+    var x: f32;
+    begin
+        x := num;
+        while abs(x * x - num) >= epsilon do
+        begin
+            x := 0.5 * (x + num / x);
+        end
+        return x;
+    end
+
+begin
+    read(a);
+    a := root(a);
+    write(a);
+end

@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "ILInstOprType.h"
 #include "ILInstType.h"
 #include "include/magic_enum/magic_enum.hpp"
 
@@ -14,6 +15,11 @@ public:
     [[nodiscard]]
     std::string ToString() const
     {
+        if (F == ILInstType::OPR)
+        {
+            return std::string(magic_enum::enum_name(F)) + " " + std::to_string(L) + " " +
+                std::string(magic_enum::enum_name(static_cast<ILInstOprType>(A)));
+        }
         return std::string(magic_enum::enum_name(F)) + " " + std::to_string(L) + " " + std::to_string(A);
     }
 };

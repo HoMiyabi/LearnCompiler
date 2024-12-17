@@ -9,9 +9,9 @@ begin
     while i <= b do
     begin
         sum := sum + i;
-        i := i + 1
-    end;
-    write(sum)
+        i := i + 1;
+    end
+    write(sum);
 end
 
 begin

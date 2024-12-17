@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <string>
+#include <variant>
 
 enum class VarAttribute
 {
@@ -20,7 +21,7 @@ public:
     VarType type;
     std::string name;
     int32_t runtimeAddress;
-    int32_t value = 0;
+    std::variant<int32_t, float> value;
 
     explicit VarInfo(VarAttribute attribute, VarType type, std::string name, int32_t runtimeAddress):
     attribute(attribute),
