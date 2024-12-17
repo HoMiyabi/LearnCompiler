@@ -572,6 +572,7 @@ private:
     // 此处已经匹配完(
     std::optional<VarType> CallProcedure(const Token& tkId, bool needRet)
     {
+        // Syntax
         int l;
         ProcedureInfo& target = GetProcedure(tkId, &l);
         int reserveForRet;
@@ -589,36 +590,45 @@ private:
             }
         }
 
-        size_t paramsCount = 0;
+        std::vector<VarType> args;
         if (!TryMatch(TokenKind::RParen))
         {
             do
             {
-                Exp();
-                paramsCount++;
+                args.push_back(Exp());
             } while (TryMatch(TokenKind::Comma));
             Match(TokenKind::RParen);
         }
 
-        if (paramsCount != target.params.size())
+        if (args.size() != target.params.size())
         {
             throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() +
                 "过程参数个数不匹配");
         }
+
+        for (size_t i = 0; i < args.size(); i++)
+        {
+            if (args[i] != target.params[i].type)
+            {
+                throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() +
+                    "过程参数类型不匹配");
+            }
+        }
+
         code.emplace_back(ILInstType::CAL, l, target.codeAddress);
 
         if (needRet)
         {
-            if (paramsCount != 0)
+            if (args.size() != 0)
             {
-                code.emplace_back(ILInstType::INT, 0, -static_cast<int>(paramsCount));
+                code.emplace_back(ILInstType::INT, 0, -static_cast<int>(args.size()));
             }
         }
         else
         {
-            if ((reserveForRet + paramsCount) != 0)
+            if ((reserveForRet + args.size()) != 0)
             {
-                code.emplace_back(ILInstType::INT, 0, -static_cast<int>(reserveForRet + paramsCount));
+                code.emplace_back(ILInstType::INT, 0, -static_cast<int>(reserveForRet + args.size()));
             }
         }
 
@@ -647,22 +657,25 @@ private:
         if (tk.kind == TokenKind::Identifier)
         {
             MoveNext();
-            if (TryMatch(TokenKind::ColonEqual))
+            auto tk1 = Match({TokenKind::ColonEqual, TokenKind::LParen});
+            if (tk1.kind == TokenKind::ColonEqual)
             {
-                int l;
-                auto varInfo = FindVar(tk, &l);
-                Exp();
-                code.emplace_back(ILInstType::STO, l, varInfo.runtimeAddress);
+                auto t = Exp();
                 Match(TokenKind::Semi);
+
+                int l;
+                auto varInfo = GetVar(tk, &l);
+                if (t != varInfo.type)
+                {
+                    throw std::runtime_error(GetErrorPrefix(tk.fileLocation) +
+                        "不能将" + magic_enum::enum_name(t).data() + "赋值给" + magic_enum::enum_name(varInfo.type).data());
+                }
+                code.emplace_back(ILInstType::STO, l, varInfo.runtimeAddress);
             }
-            else if (TryMatch(TokenKind::LParen))
+            else if (tk1.kind == TokenKind::LParen)
             {
                 CallProcedure(tk, false);
                 Match(TokenKind::Semi);
-            }
-            else
-            {
-                throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "必须为:=或(");
             }
         }
         else if (tk.kind == TokenKind::If)
@@ -710,7 +723,7 @@ private:
             {
                 auto tkVar = Match(TokenKind::Identifier);
                 int l;
-                auto varInfo = FindVar(tkVar, &l);
+                auto varInfo = GetVar(tkVar, &l);
                 if (varInfo.type == VarType::I32)
                 {
                     code.emplace_back(ILInstType::RED, l, varInfo.runtimeAddress);
@@ -876,7 +889,7 @@ private:
                 return *t;
             }
             int l;
-            auto varInfo = FindVar(tk, &l);
+            auto varInfo = GetVar(tk, &l);
             code.emplace_back(ILInstType::LOD, l, varInfo.runtimeAddress);
             return varInfo.type;
         }
@@ -969,7 +982,7 @@ private:
         return tk;
     }
 
-    VarInfo FindVar(const Token& tkVar, int* pL)
+    VarInfo GetVar(const Token& tkVar, int* pL)
     {
         int l = 0;
         const std::string& name = tkVar.String();
