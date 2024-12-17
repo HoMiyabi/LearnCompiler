@@ -1,9 +1,9 @@
 ﻿program fibtest;
-var ans, x;
+var ans: i32, x: i32;
 
-    procedure fib(n): i32
+    procedure fib(n: i32): i32
     begin
-        if n = 0 then
+        if n <= 0 then
         begin
             return 0;
         end

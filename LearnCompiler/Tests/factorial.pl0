@@ -1,7 +1,7 @@
 ﻿program fact;
-var n;
+var n: i32;
 
-    procedure factorial(n): i32
+    procedure factorial(n: i32): i32
     begin
         if n = 0 then
             return 1;

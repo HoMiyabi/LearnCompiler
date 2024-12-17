@@ -1,8 +1,8 @@
 ﻿program outvar;
-var l0a;
+var l0a: i32;
 
     procedure l1()
-    var l1a;
+    var l1a: i32;
 
         procedure l2()
         begin
