@@ -4,6 +4,8 @@
 #include <optional>
 #include <variant>
 
+#include "PtrHelper.h"
+
 export module Parser;
 import CallProcedureNode;
 import ASTNode;
@@ -519,7 +521,7 @@ private:
                         "不能将" + to_string(node->varType) + "赋值给" + to_string(varInfo.type));
                 }
                 node->GenerateCode(code);
-                delete node;
+                SAFE_DELETE(node);
                 code.emplace_back(ILInstType::STO, l, varInfo.runtimeAddress);
             }
             else if (tk1.kind == TokenKind::LParen)
@@ -538,7 +540,7 @@ private:
                 throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "条件表达式类型必须为i32");
             }
             node->GenerateCode(code);
-            delete node;
+            SAFE_DELETE(node);
 
             code.emplace_back(ILInstType::JPC, 0, 0);
             int jpcIdx = code.size() - 1;
@@ -561,7 +563,16 @@ private:
         {
             MoveNext();
             int whileStart = code.size();
-            Lexp();
+
+            ASTNode* node = Lexp();
+            node = node->CalTypeAndOptimize();
+            if (node->varType != VarType::I32)
+            {
+                throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "条件表达式类型必须为i32");
+            }
+            node->GenerateCode(code);
+            SAFE_DELETE(node);
+
             code.emplace_back(ILInstType::JPC, 0, 0);
             int jpcIdx = code.size() - 1;
             Match(TokenKind::Do);
@@ -603,7 +614,6 @@ private:
                 ASTNode* node = Exp();
                 node = node->CalTypeAndOptimize();
                 node->GenerateCode(code);
-                delete node;
 
                 if (node->varType == VarType::I32)
                 {
@@ -613,6 +623,12 @@ private:
                 {
                     code.emplace_back(ILInstType::FWRT, 0, 0);
                 }
+                else
+                {
+                    throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "write()参数类型错误");
+                }
+
+                SAFE_DELETE(node);
             } while (TryMatch(TokenKind::Comma));
             Match(TokenKind::RParen);
             Match(TokenKind::Semi);
@@ -646,7 +662,7 @@ private:
                     throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "返回值类型不匹配");
                 }
                 node->GenerateCode(code);
-                delete node;
+                SAFE_DELETE(node);
 
                 code.emplace_back(ILInstType::STO, 0, procedure.ret->runtimeAddress);
                 GenPopVars();

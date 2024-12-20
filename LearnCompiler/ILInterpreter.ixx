@@ -17,6 +17,8 @@ private:
     int32_t rip = 0; // 程序地址寄存器P：存放下一条要执行的指令地址
     std::vector<int32_t> stk;
 
+    bool bPrintIL = false;
+
 public:
     ILInterpreter()
     {
@@ -32,7 +34,10 @@ public:
         while (rip != code.size())
         {
             Fetch(code);
-            std::cout << rip - 1 << I.ToString() << std::endl;
+            if (bPrintIL)
+            {
+                std::cout << rip << ": " << I.ToString() << std::endl;
+            }
             switch (I.F)
             {
             case ILInstType::LIT:

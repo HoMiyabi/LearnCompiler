@@ -34,7 +34,9 @@ int main(int argc, char* argv[])
     {
         std::cout << i << ": " << code[i].ToString() << '\n';
     }
-    ILInterpreter().Interpret(code);
+
+    ILInterpreter interpreter;
+    interpreter.Interpret(code);
 
     return 0;
 }

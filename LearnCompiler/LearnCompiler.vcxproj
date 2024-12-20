@@ -183,13 +183,13 @@
     <ClCompile Include="AST\BinaryNode.ixx" />
     <ClCompile Include="AST\BinaryOp.ixx" />
     <ClCompile Include="AST\CallProcedureNode.ixx" />
-    <ClCompile Include="AST\ThrowHelper.h" />
     <ClCompile Include="AST\UnaryNode.ixx" />
     <ClCompile Include="AST\UnaryNodeEvaluator.ixx" />
     <ClCompile Include="AST\ValueNode.ixx" />
     <ClCompile Include="AST\VarNode.ixx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="PtrHelper.h" />
     <ClInclude Include="include\magic_enum\magic_enum.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_all.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_containers.hpp" />

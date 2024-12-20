@@ -50,11 +50,6 @@ export struct CallProcedureNode : ASTNode
 
     void GenerateCode(std::vector<ILInst>& code) override
     {
-        for (auto& arg : args)
-        {
-            arg->GenerateCode(code);
-        }
-
         int reserveForRet;
         if (proc->ret)
         {
@@ -68,6 +63,11 @@ export struct CallProcedureNode : ASTNode
             {
                 throw std::runtime_error("过程需要返回值");
             }
+        }
+
+        for (auto& arg : args)
+        {
+            arg->GenerateCode(code);
         }
 
         code.emplace_back(ILInstType::CAL, l, proc->codeAddress);

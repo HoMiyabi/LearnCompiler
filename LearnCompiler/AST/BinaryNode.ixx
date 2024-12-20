@@ -1,6 +1,6 @@
 ﻿module;
 #include <stdexcept>
-#include "ThrowHelper.h"
+#include "../PtrHelper.h"
 #include <vector>
 
 export module BinaryNode;
