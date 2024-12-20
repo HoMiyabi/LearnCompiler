@@ -43,3 +43,10 @@
 .vs/
 *.vcxproj.user
 .idea/
+
+# MSVC modules files
+*.ifc
+*.ifc.d.json
+*.module.json
+
+*.vcxproj.FileListAbsolute.txt
