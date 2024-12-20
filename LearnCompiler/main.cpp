@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <chrono>
 
 import FileUtils;
 import Tokenizer;
@@ -18,10 +19,10 @@ int main(int argc, char* argv[])
     Tokenizer tokenizer(std::move(text));
     Parser parser(tokenizer);
 
-    parser.Parse();
+    // parser.Parse();
     try
     {
-        // parser.Parse();
+        parser.Parse();
     }
     catch (const std::exception& e)
     {
@@ -36,7 +37,11 @@ int main(int argc, char* argv[])
     }
 
     ILInterpreter interpreter;
+    auto start = std::chrono::steady_clock::now();
     interpreter.Interpret(code);
+    auto end = std::chrono::steady_clock::now();
+    std::cout << "程序耗时: " <<
+        std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms\n";
 
     return 0;
 }

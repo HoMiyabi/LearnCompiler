@@ -3,19 +3,15 @@ var ans: i32, x: i32;
 
     procedure fib(n: i32): i32
     begin
-        if n <= 0 then
+        if n < 2 then
         begin
-            return 0;
-        end
-        if n = 1 then
-        begin
-            return 1;
+            return n;
         end
         return fib(n - 1) + fib(n - 2);
     end
 
 begin
-    read(x);
+    x := 35;
     ans := fib(x);
     write(ans);
 end
