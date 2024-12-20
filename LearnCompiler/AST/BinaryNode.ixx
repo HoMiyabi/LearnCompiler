@@ -41,8 +41,6 @@ export struct BinaryNode : ASTNode
         if (l && r)
         {
             auto p = it->eval(l, r);
-            delete l;
-            delete r;
             delete this;
             return p;
         }

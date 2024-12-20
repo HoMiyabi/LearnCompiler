@@ -24,7 +24,7 @@ export struct UnaryNode : ASTNode
     ASTNode* CalTypeAndOptimize() override
     {
         THROW_IF_NULL(child);
-        child->CalTypeAndOptimize();
+        child = child->CalTypeAndOptimize();
 
         const auto it = unaryNodeEvaluators.find(UnaryNodeEvaluator(type, child->varType));
         if (it == unaryNodeEvaluators.end())
@@ -36,7 +36,6 @@ export struct UnaryNode : ASTNode
         if (p)
         {
             auto p2 = it->eval(p);
-            delete p;
             delete this;
             return p2;
         }

@@ -201,6 +201,7 @@
     <ClInclude Include="include\magic_enum\magic_enum_utility.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Tests\eval.pl0" />
     <Content Include="Tests\factorial.pl0" />
     <Content Include="Tests\fib.pl0" />
     <Content Include="Tests\hello.pas" />

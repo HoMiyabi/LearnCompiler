@@ -1,0 +1,8 @@
+﻿program eval;
+const a := 5;
+var b: f32;
+
+begin
+    b := f32(3 * a + i32(1.5)) + 0.5;
+    write(b);
+end
