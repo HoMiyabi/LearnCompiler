@@ -163,15 +163,33 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Parser.ixx" />
+    <ClCompile Include="CharUtils.ixx" />
+    <ClCompile Include="ProcedureInfo.ixx" />
+    <ClCompile Include="ThirdParty\magic_enum.ixx" />
+    <ClCompile Include="VarInfo.ixx" />
+    <ClCompile Include="FileLocation.ixx" />
+    <ClCompile Include="FileUtils.ixx" />
+    <ClCompile Include="ILInstOprType.ixx" />
+    <ClCompile Include="ILInterpreter.ixx" />
+    <ClCompile Include="ILInst.ixx" />
+    <ClCompile Include="ILInstType.ixx" />
+    <ClCompile Include="Token.ixx" />
+    <ClCompile Include="Tokenizer.ixx" />
+    <ClCompile Include="TokenKind.ixx" />
+    <ClCompile Include="AST\BinaryNodeType.ixx" />
+    <ClCompile Include="AST\UnaryNodeType.ixx" />
+    <ClCompile Include="AST\ASTNode.ixx" />
+    <ClCompile Include="AST\BinaryNode.ixx" />
+    <ClCompile Include="AST\BinaryOp.ixx" />
+    <ClCompile Include="AST\CallProcedureNode.ixx" />
+    <ClCompile Include="AST\ThrowHelper.h" />
+    <ClCompile Include="AST\UnaryNode.ixx" />
+    <ClCompile Include="AST\UnaryNodeEvaluator.ixx" />
+    <ClCompile Include="AST\ValueNode.ixx" />
+    <ClCompile Include="AST\VarNode.ixx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CharUtils.h" />
-    <ClInclude Include="FileLocation.h" />
-    <ClInclude Include="FileUtils.h" />
-    <ClInclude Include="ILInstOprType.h" />
-    <ClInclude Include="ILInterpreter.h" />
-    <ClInclude Include="ILInst.h" />
-    <ClInclude Include="ILInstType.h" />
     <ClInclude Include="include\magic_enum\magic_enum.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_all.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_containers.hpp" />
@@ -181,12 +199,6 @@
     <ClInclude Include="include\magic_enum\magic_enum_iostream.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_switch.hpp" />
     <ClInclude Include="include\magic_enum\magic_enum_utility.hpp" />
-    <ClInclude Include="Parser.h" />
-    <ClInclude Include="ProcedureInfo.h" />
-    <ClInclude Include="Token.h" />
-    <ClInclude Include="Tokenizer.h" />
-    <ClInclude Include="TokenKind.h" />
-    <ClInclude Include="VarInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tests\factorial.pl0" />

@@ -1,9 +1,11 @@
-﻿#pragma once
+﻿module;
 #include <fstream>
 #include <sstream>
 #include <string>
 
-inline std::string ReadFile(const std::string& fileName)
+export module FileUtils;
+
+export std::string ReadFile(const std::string& fileName)
 {
     const std::ifstream ifs{fileName};
     std::ostringstream ss;

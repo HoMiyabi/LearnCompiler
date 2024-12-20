@@ -1,11 +1,14 @@
-﻿#pragma once
+﻿module;
 #include <iostream>
 #include <stdexcept>
 #include <vector>
-#include "ILInst.h"
-#include "ILInstOprType.h"
 
-class ILInterpreter
+export module ILInterpreter;
+import ILInst;
+import ILInstType;
+import ILInstOprType;
+
+export class ILInterpreter
 {
 private:
     ILInst I {ILInstType::LIT, 0, 0}; // 指令寄存器I: 存放当前要执行的代码
@@ -29,7 +32,7 @@ public:
         while (rip != code.size())
         {
             Fetch(code);
-            // std::cout << rip - 1 << I.ToString() << std::endl;
+            std::cout << rip - 1 << I.ToString() << std::endl;
             switch (I.F)
             {
             case ILInstType::LIT:

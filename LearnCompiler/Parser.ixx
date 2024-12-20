@@ -1,136 +1,29 @@
-﻿#pragma once
+﻿module;
 #include <iostream>
+#include <vector>
+#include <optional>
+#include <variant>
 
-#include "ILInst.h"
-#include "ILInstOprType.h"
-#include "ProcedureInfo.h"
-#include "Tokenizer.h"
-#include "VarInfo.h"
+export module Parser;
+import CallProcedureNode;
+import ASTNode;
+import BinaryNode;
+import UnaryNode;
+import UnaryNodeType;
+import ValueNode;
+import VarNode;
+import BinaryNodeType;
+import Token;
+import Tokenizer;
+import ProcedureInfo;
+import ILInst;
+import TokenKind;
+import VarInfo;
+import ILInstType;
+import FileLocation;
+import ILInstOprType;
 
-class BuiltInBinaryOp
-{
-public:
-    TokenKind op;
-    VarType t1;
-    VarType t2;
-    VarType ret = VarType::I32;
-
-    BuiltInBinaryOp(TokenKind op, VarType t1, VarType t2):
-    op(op), t1(t1), t2(t2)
-    {
-    }
-
-    BuiltInBinaryOp(TokenKind op, VarType t1, VarType t2, VarType ret):
-    op(op), t1(t1), t2(t2), ret(ret)
-    {
-    }
-
-    bool operator==(const BuiltInBinaryOp& other) const
-    {
-        return op == other.op && t1 == other.t1 && t2 == other.t2;
-    }
-};
-
-struct BuiltInBinaryOpHasher
-{
-    std::size_t operator()(const BuiltInBinaryOp& op) const
-    {
-        std::hash<int32_t> h;
-        return
-            h(static_cast<int32_t>(op.op)) ^
-            h(static_cast<int32_t>(op.t1)) ^
-            h(static_cast<int32_t>(op.t2));
-    }
-};
-
-std::unordered_map<BuiltInBinaryOp, ILInst, BuiltInBinaryOpHasher> builtInOpToILInst
-{
-    // I32
-    {
-        BuiltInBinaryOp(TokenKind::Plus, VarType::I32, VarType::I32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Add))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::Minus, VarType::I32, VarType::I32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Sub))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::Star, VarType::I32, VarType::I32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Mul))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::Slash, VarType::I32, VarType::I32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Div))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::Equal, VarType::I32, VarType::I32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Eql))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::LessGreater, VarType::I32, VarType::I32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Neq))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::Less, VarType::I32, VarType::I32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Lss))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::LessEqual, VarType::I32, VarType::I32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Leq))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::Greater, VarType::I32, VarType::I32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Gtr))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::GreaterEqual, VarType::I32, VarType::I32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Geq))
-    },
-
-    // F32
-    {
-        BuiltInBinaryOp(TokenKind::Plus, VarType::F32, VarType::F32, VarType::F32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::FAdd))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::Minus, VarType::F32, VarType::F32, VarType::F32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::FSub))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::Star, VarType::F32, VarType::F32, VarType::F32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::FMul))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::Slash, VarType::F32, VarType::F32, VarType::F32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::FDiv))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::Equal, VarType::F32, VarType::F32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::FEql))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::LessGreater, VarType::F32, VarType::F32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::FNeq))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::Less, VarType::F32, VarType::F32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::FLss))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::LessEqual, VarType::F32, VarType::F32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::FLeq))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::Greater, VarType::F32, VarType::F32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::FGtr))
-    },
-    {
-        BuiltInBinaryOp(TokenKind::GreaterEqual, VarType::F32, VarType::F32, VarType::I32),
-        ILInst(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::FGeq))
-    },
-};
-
-class Parser
+export class Parser
 {
 private:
     Tokenizer& tokenizer;
@@ -164,7 +57,7 @@ private:
     static void ThrowMismatch(const Token& tk, const TokenKind expected)
     {
         throw std::runtime_error(GetErrorPrefix(tk.fileLocation) +
-            "预期" + std::string(magic_enum::enum_name(expected)) +
+            "预期" + std::string(to_string(expected)) +
             "，但实际为" + tk.ToString());
     }
 
@@ -174,7 +67,7 @@ private:
         std::string message = GetErrorPrefix(tk.fileLocation) + "预期";
         for (auto it = expected.begin(); it != expected.end(); ++it)
         {
-            message += magic_enum::enum_name(*it);
+            message += to_string(*it);
             if (it != expected.end() - 1)
             {
                 message += "、";
@@ -187,7 +80,7 @@ private:
     [[noreturn]]
     static void ThrowEOF(const TokenKind excepted)
     {
-        std::string message = "预期" + std::string(magic_enum::enum_name(excepted)) + "，但已经到达文件尾部";
+        std::string message = "预期" + std::string(to_string(excepted)) + "，但已经到达文件尾部";
         throw std::runtime_error(message);
     }
 
@@ -197,7 +90,7 @@ private:
         std::string message = "预期";
         for (auto it = excepted.begin(); it != excepted.end(); ++it)
         {
-            message += magic_enum::enum_name(*it);
+            message += to_string(*it);
             if (it != excepted.end() - 1)
             {
                 message += "、";
@@ -285,6 +178,24 @@ private:
         return token.value();
     }
 
+    const Token& Current(const std::vector<TokenKind>& excepted)
+    {
+        if (!token)
+        {
+            ThrowEOF(excepted);
+        }
+
+        for (auto it = excepted.begin(); it != excepted.end(); ++it)
+        {
+            if (token->kind == *it)
+            {
+                token = tokenizer.GetToken();
+                return *token;
+            }
+        }
+        ThrowMismatch(*token, excepted);
+    }
+
     const Token& Current(const std::string& expected)
     {
         if (!token.has_value())
@@ -311,16 +222,6 @@ private:
         path.pop_back();
     }
 
-    ILInst GetLIT(int32_t value)
-    {
-        return ILInst(ILInstType::LIT, 0, value);
-    }
-
-    ILInst GetLIT(float value)
-    {
-        return ILInst(ILInstType::LIT, 0, *(int*)(&value));
-    }
-
     // <block> -> [<condecl>][<vardecl>][<proc>]<body>
     void Block()
     {
@@ -336,15 +237,15 @@ private:
         }
 
         GenPushVars();
-        for (auto it = procedure->vars.begin(); it != procedure->vars.end() && it->attribute == VarAttribute::Const; ++it)
+        for (auto it = procedure->vars.begin(); it != procedure->vars.end() && it->bConst; ++it)
         {
             if (it->type == VarType::I32)
             {
-                code.emplace_back(GetLIT(std::get<int32_t>(it->value)));
+                code.emplace_back(ILInst::LIT(std::get<int32_t>(it->value)));
             }
             else if (it->type == VarType::F32)
             {
-                code.emplace_back(GetLIT(std::get<float>(it->value)));
+                code.emplace_back(ILInst::LIT(std::get<float>(it->value)));
             }
             code.emplace_back(ILInstType::STO, 0, it->runtimeAddress);
         }
@@ -398,7 +299,7 @@ private:
             throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() + "重复定义");
         }
 
-        VarInfo varInfo(VarAttribute::Const, VarType::I32, tkId.String(), procedure.vars.size());
+        VarInfo varInfo(true, VarType::I32, tkId.String(), procedure.vars.size());
         if (tkLiteral.kind == TokenKind::Int32)
         {
             varInfo.type = VarType::I32;
@@ -434,7 +335,7 @@ private:
         {
             throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() + "重复定义");
         }
-        VarInfo varInfo(VarAttribute::Var, VarType::I32, tkId.String(), procedure.vars.size());
+        VarInfo varInfo(false, VarType::I32, tkId.String(), procedure.vars.size());
         if (tkType.kind == TokenKind::I32)
         {
             varInfo.type = VarType::I32;
@@ -478,7 +379,7 @@ private:
                 Token tkId = Match(TokenKind::Identifier);
                 Match(TokenKind::Colon);
                 Token tkType = Match({TokenKind::I32, TokenKind::F32});
-                VarInfo varInfo(VarAttribute::Var, VarType::I32, tkId.String(), params.size());
+                VarInfo varInfo(false, VarType::I32, tkId.String(), params.size());
                 if (tkType.kind == TokenKind::F32)
                 {
                     varInfo.type = VarType::F32;
@@ -493,7 +394,7 @@ private:
         if (TryMatch(TokenKind::Colon))
         {
             Token tkRet = Match({TokenKind::I32, TokenKind::F32});
-            ret = VarInfo(VarAttribute::Var, VarType::I32, "", -static_cast<int>(params.size()) - 4);
+            ret = VarInfo(false, VarType::I32, "", -static_cast<int>(params.size()) - 4);
             if (tkRet.kind == TokenKind::F32)
             {
                 ret->type = VarType::F32;
@@ -568,29 +469,12 @@ private:
         throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + tk.String() + "过程未定义");
     }
 
-    // <CallProcedure> -> <id> ([<exp>{,<exp>}])
-    // 此处已经匹配完(
-    std::optional<VarType> CallProcedure(const Token& tkId, bool needRet)
+    CallProcedureNode* CallProcedure(const Token& tkId, bool needRet)
     {
-        // Syntax
         int l;
-        ProcedureInfo& target = GetProcedure(tkId, &l);
-        int reserveForRet;
-        if (target.ret)
-        {
-            reserveForRet = 1;
-            code.emplace_back(ILInstType::INT, 0, 1);
-        }
-        else
-        {
-            reserveForRet = 0;
-            if (needRet)
-            {
-                throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() + "过程需要返回值");
-            }
-        }
+        ProcedureInfo& proc = GetProcedure(tkId, &l);
 
-        std::vector<VarType> args;
+        std::vector<ASTNode*> args;
         if (!TryMatch(TokenKind::RParen))
         {
             do
@@ -599,44 +483,7 @@ private:
             } while (TryMatch(TokenKind::Comma));
             Match(TokenKind::RParen);
         }
-
-        if (args.size() != target.params.size())
-        {
-            throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() +
-                "过程参数个数不匹配");
-        }
-
-        for (size_t i = 0; i < args.size(); i++)
-        {
-            if (args[i] != target.params[i].type)
-            {
-                throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() +
-                    "过程参数类型不匹配");
-            }
-        }
-
-        code.emplace_back(ILInstType::CAL, l, target.codeAddress);
-
-        if (needRet)
-        {
-            if (args.size() != 0)
-            {
-                code.emplace_back(ILInstType::INT, 0, -static_cast<int>(args.size()));
-            }
-        }
-        else
-        {
-            if ((reserveForRet + args.size()) != 0)
-            {
-                code.emplace_back(ILInstType::INT, 0, -static_cast<int>(reserveForRet + args.size()));
-            }
-        }
-
-        if (target.ret)
-        {
-            return target.ret->type;
-        }
-        return std::nullopt;
+        return new CallProcedureNode(&proc, l, std::move(args), needRet);
     }
 
 /*
@@ -660,16 +507,19 @@ private:
             auto tk1 = Match({TokenKind::ColonEqual, TokenKind::LParen});
             if (tk1.kind == TokenKind::ColonEqual)
             {
-                auto t = Exp();
+                auto node = Exp();
                 Match(TokenKind::Semi);
 
+                node = node->CalTypeAndOptimize();
                 int l;
-                auto varInfo = GetVar(tk, &l);
-                if (t != varInfo.type)
+                const VarInfo& varInfo = GetVar(tk, &l);
+                if (node->varType != varInfo.type)
                 {
                     throw std::runtime_error(GetErrorPrefix(tk.fileLocation) +
-                        "不能将" + magic_enum::enum_name(t).data() + "赋值给" + magic_enum::enum_name(varInfo.type).data());
+                        "不能将" + to_string(node->varType) + "赋值给" + to_string(varInfo.type));
                 }
+                node->GenerateCode(code);
+                delete node;
                 code.emplace_back(ILInstType::STO, l, varInfo.runtimeAddress);
             }
             else if (tk1.kind == TokenKind::LParen)
@@ -681,7 +531,15 @@ private:
         else if (tk.kind == TokenKind::If)
         {
             MoveNext();
-            Lexp();
+            ASTNode* node = Lexp();
+            node = node->CalTypeAndOptimize();
+            if (node->varType != VarType::I32)
+            {
+                throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "条件表达式类型必须为i32");
+            }
+            node->GenerateCode(code);
+            delete node;
+
             code.emplace_back(ILInstType::JPC, 0, 0);
             int jpcIdx = code.size() - 1;
             Match(TokenKind::Then);
@@ -723,7 +581,7 @@ private:
             {
                 auto tkVar = Match(TokenKind::Identifier);
                 int l;
-                auto varInfo = GetVar(tkVar, &l);
+                const VarInfo& varInfo = GetVar(tkVar, &l);
                 if (varInfo.type == VarType::I32)
                 {
                     code.emplace_back(ILInstType::RED, l, varInfo.runtimeAddress);
@@ -742,12 +600,16 @@ private:
             Match(TokenKind::LParen);
             do
             {
-                VarType t = Exp();
-                if (t == VarType::I32)
+                ASTNode* node = Exp();
+                node = node->CalTypeAndOptimize();
+                node->GenerateCode(code);
+                delete node;
+
+                if (node->varType == VarType::I32)
                 {
                     code.emplace_back(ILInstType::WRT, 0, 0);
                 }
-                else if (t == VarType::F32)
+                else if (node->varType == VarType::F32)
                 {
                     code.emplace_back(ILInstType::FWRT, 0, 0);
                 }
@@ -769,17 +631,23 @@ private:
             }
             else
             {
-                VarType t = Exp();
+                ASTNode* node = Exp();
                 Match(TokenKind::Semi);
 
                 if (!procedure.ret)
                 {
                     throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "过程没有返回值");
                 }
-                if (t != procedure.ret->type)
+
+                node = node->CalTypeAndOptimize();
+
+                if (node->varType != procedure.ret->type)
                 {
                     throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "返回值类型不匹配");
                 }
+                node->GenerateCode(code);
+                delete node;
+
                 code.emplace_back(ILInstType::STO, 0, procedure.ret->runtimeAddress);
                 GenPopVars();
                 code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Ret));
@@ -802,30 +670,25 @@ private:
 
     // <lexp> → <exp> <lop> <exp>|odd <exp>
     // Logical Expression
-    void Lexp()
+    ASTNode* Lexp()
     {
         if (auto tk = TryMatch(TokenKind::Odd))
         {
-            auto t = Exp();
-            if (t != VarType::I32)
-            {
-                throw std::runtime_error(GetErrorPrefix(tk->fileLocation) + "odd运算符只能用于整型");
-            }
-            code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Odd));
+            auto node = Exp();
+            return new UnaryNode(UnaryNodeType::Odd, node);
         }
-        else
-        {
-            auto t1 = Exp();
-            const auto tkLop = Lop();
-            auto t2 = Exp();
-            GenOp(tkLop, t1, t2);
-        }
+        auto node1 = Exp();
+        auto nodeLop = Lop();
+        auto node2 = Exp();
+        nodeLop->left = node1;
+        nodeLop->right = node2;
+        return nodeLop;
     }
 
     // exp.first = +, -, id, int, (
     // <exp> -> [+|-]<term>{<aop><term>}
     // Expression
-    VarType Exp()
+    ASTNode* Exp()
     {
         bool flag = false;
         if (TryMatch(TokenKind::Minus))
@@ -836,153 +699,151 @@ private:
         {
             TryMatch(TokenKind::Plus);
         }
-        auto t1 = Term();
+        auto node1 = Term();
         if (flag)
         {
-            if (t1 == VarType::I32)
-            {
-                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Neg));
-            }
-            else if (t1 == VarType::F32)
-            {
-                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::FNeg));
-            }
+            node1 = new UnaryNode(UnaryNodeType::Neg, node1);
         }
         while (TryCurrent({TokenKind::Plus, TokenKind::Minus}))
         {
-            auto tkAop = Aop();
-            auto t2 = Term();
-            t1 = GenOp(tkAop, t1, t2);
+            auto nodeAop = Aop();
+            auto node2 = Term();
+            nodeAop->left = node1;
+            nodeAop->right = node2;
+            node1 = nodeAop;
         }
-        return t1;
+        return node1;
     }
 
     // <term> -> <factor>{<mop><factor>}
     // term.first = id, int, (
-    VarType Term()
+    ASTNode* Term()
     {
-        auto t1 = Factor();
+        auto node1 = Factor();
         while (TryCurrent({TokenKind::Star, TokenKind::Slash}))
         {
-            auto tkMop = Mop();
-            auto t2 = Factor();
-            t1 = GenOp(tkMop, t1, t2);
+            auto nodeMop = Mop();
+            auto node2 = Factor();
+            nodeMop->left = node1;
+            nodeMop->right = node2;
+            node1 = nodeMop;
         }
-        return t1;
+        return node1;
     }
 
     // <factor> ->  <id>
     //             |<CallProcedure>
-    //             |<integer>
+    //             |<literal>
     //             |(<exp>)
-    // factor.first = id, int, (
-    VarType Factor()
+    //             |i32 (<exp>)
+    //             |f32 (<exp>)
+    ASTNode* Factor()
     {
-        const auto tk = Current("Factor");
+        std::vector<TokenKind> excepted {
+            TokenKind::Identifier,
+            TokenKind::Int32,
+            TokenKind::Float32,
+            TokenKind::LParen,
+            TokenKind::I32,
+            TokenKind::F32};
+        const Token tk = Match(excepted);
 
         if (tk.kind == TokenKind::Identifier)
         {
-            MoveNext();
             if (TryMatch(TokenKind::LParen))
             {
-                auto t = CallProcedure(tk, true);
-                return *t;
+                // 匹配到过程调用
+                return CallProcedure(tk, true);
             }
+
             int l;
-            auto varInfo = GetVar(tk, &l);
-            code.emplace_back(ILInstType::LOD, l, varInfo.runtimeAddress);
-            return varInfo.type;
+            const VarInfo& varInfo = GetVar(tk, &l);
+            if (varInfo.bConst)
+            {
+                // 常量传播
+                return new ValueNode(varInfo.type, varInfo.value);
+            }
+            return new VarNode(&varInfo, l);
         }
         if (tk.kind == TokenKind::Int32)
         {
-            MoveNext();
-            code.emplace_back(ILInstType::LIT, 0, tk.Int32());
-            return VarType::I32;
+            return new ValueNode(VarType::I32, tk.Int32());
         }
         if (tk.kind == TokenKind::Float32)
         {
-            MoveNext();
-            code.emplace_back(GetLIT(tk.Float32()));
-            return VarType::F32;
+            return new ValueNode(VarType::F32, tk.Float32());
         }
         if (tk.kind == TokenKind::LParen)
         {
-            MoveNext();
-            auto type = Exp();
+            ASTNode* node = Exp();
             Match(TokenKind::RParen);
-            return type;
+            return node;
         }
         if (tk.kind == TokenKind::I32)
         {
-            MoveNext();
             Match(TokenKind::LParen);
-            auto type = Exp();
+            ASTNode* node = Exp();
             Match(TokenKind::RParen);
-            if (type == VarType::F32)
-            {
-                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::FToI));
-            }
-            return VarType::I32;
+            return new UnaryNode(UnaryNodeType::ToI32, node);
         }
         if (tk.kind == TokenKind::F32)
         {
-            MoveNext();
             Match(TokenKind::LParen);
-            auto type = Exp();
+            auto node = Exp();
             Match(TokenKind::RParen);
-            if (type == VarType::I32)
-            {
-                code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::IToF));
-            }
-            return VarType::F32;
+            return new UnaryNode(UnaryNodeType::ToF32, node);
         }
-        ThrowMismatch(tk, "Factor");
     }
 
     // <lop> -> =|<>|<|<=|>|>=
-    Token Lop()
+    BinaryNode* Lop()
     {
         const auto tk = Match({
             TokenKind::Equal, TokenKind::LessGreater,
             TokenKind::Less, TokenKind::LessEqual,
             TokenKind::Greater, TokenKind::GreaterEqual});
-        return tk;
-    }
-
-    ILInst GetInst(const Token& tkOp, VarType t1, VarType t2)
-    {
-
+        switch (tk.kind)
+        {
+        case TokenKind::Equal:
+            return new BinaryNode(BinaryNodeType::Eql);
+        case TokenKind::LessGreater:
+            return new BinaryNode(BinaryNodeType::Neq);
+        case TokenKind::Less:
+            return new BinaryNode(BinaryNodeType::Lss);
+        case TokenKind::LessEqual:
+            return new BinaryNode(BinaryNodeType::Leq);
+        case TokenKind::Greater:
+            return new BinaryNode(BinaryNodeType::Gtr);
+        case TokenKind::GreaterEqual:
+            return new BinaryNode(BinaryNodeType::Geq);
+        default:
+            throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "Lop错误");
+        }
     }
 
     // <aop> -> +|-
-    Token Aop()
+    BinaryNode* Aop()
     {
         const auto tk = Match({TokenKind::Plus, TokenKind::Minus});
-        return tk;
-    }
-
-    VarType GenOp(const Token& tkOp, VarType t1, VarType t2)
-    {
-        if (auto it = builtInOpToILInst.find(BuiltInBinaryOp(tkOp.kind, t1, t2));
-            it != builtInOpToILInst.end())
+        if (tk.kind == TokenKind::Plus)
         {
-            code.emplace_back(it->second);
-            return it->first.ret;
+            return new BinaryNode(BinaryNodeType::Add);
         }
-        throw std::runtime_error(GetErrorPrefix(tkOp.fileLocation) + "不存在运算符" +
-            std::string(magic_enum::enum_name(t1)) + " " +
-            std::string(magic_enum::enum_name(tkOp.kind)) + " " +
-            std::string(magic_enum::enum_name(t2)));
+        return new BinaryNode(BinaryNodeType::Sub);
     }
 
     // <mop> -> *|/
-    Token Mop()
+    BinaryNode* Mop()
     {
         const auto tk = Match({TokenKind::Star, TokenKind::Slash});
-        return tk;
+        if (tk.kind == TokenKind::Star)
+        {
+            return new BinaryNode(BinaryNodeType::Mul);
+        }
+        return new BinaryNode(BinaryNodeType::Div);
     }
 
-    VarInfo GetVar(const Token& tkVar, int* pL)
+    const VarInfo& GetVar(const Token& tkVar, int* pL)
     {
         int l = 0;
         const std::string& name = tkVar.String();

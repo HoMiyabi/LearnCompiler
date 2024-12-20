@@ -1,7 +1,9 @@
-﻿#pragma once
+﻿module;
 #include <string>
 
-class FileLocation
+export module FileLocation;
+
+export class FileLocation
 {
 public:
     int row = 1;

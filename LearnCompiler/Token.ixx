@@ -1,11 +1,12 @@
-﻿#pragma once
+﻿module;
 #include <string>
 #include <variant>
 
-#include "TokenKind.h"
-#include "include/magic_enum/magic_enum.hpp"
+export module Token;
+import TokenKind;
+import FileLocation;
 
-class Token
+export class Token
 {
 public:
     TokenKind kind;
@@ -44,7 +45,7 @@ public:
     std::string ToString() const
     {
         std::string text;
-        text += magic_enum::enum_name(kind);
+        text += to_string(kind);
         if (kind == TokenKind::Int32)
         {
             text += ' ';

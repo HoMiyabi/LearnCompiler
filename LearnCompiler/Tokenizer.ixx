@@ -1,13 +1,15 @@
-﻿#pragma once
+﻿module;
+#include <optional>
+#include <stdexcept>
 #include <string>
-#include <unordered_set>
 
-#include "CharUtils.h"
-#include "FileLocation.h"
-#include "Token.h"
-#include "TokenKind.h"
+export module Tokenizer;
+import FileLocation;
+import Token;
+import CharUtils;
+import TokenKind;
 
-class Tokenizer
+export class Tokenizer
 {
 public:
     std::string message;

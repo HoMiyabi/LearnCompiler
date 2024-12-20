@@ -1,11 +1,12 @@
-﻿#pragma once
+﻿module;
 #include <optional>
 #include <string>
 #include <vector>
 
-#include "VarInfo.h"
+export module ProcedureInfo;
+import VarInfo;
 
-class ProcedureInfo
+export class ProcedureInfo
 {
 public:
     int32_t codeAddress = 0;

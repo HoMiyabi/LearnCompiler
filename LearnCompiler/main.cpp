@@ -1,10 +1,9 @@
 ﻿#include <iostream>
 
-#include "FileUtils.h"
-#include "ILInterpreter.h"
-#include "Parser.h"
-#include "Token.h"
-#include "Tokenizer.h"
+import FileUtils;
+import Tokenizer;
+import Parser;
+import ILInterpreter;
 
 int main(int argc, char* argv[])
 {
@@ -19,10 +18,10 @@ int main(int argc, char* argv[])
     Tokenizer tokenizer(std::move(text));
     Parser parser(tokenizer);
 
-    // parser.Parse();
+    parser.Parse();
     try
     {
-        parser.Parse();
+        // parser.Parse();
     }
     catch (const std::exception& e)
     {
