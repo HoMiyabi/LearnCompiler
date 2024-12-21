@@ -24,14 +24,15 @@ int main(int argc, char* argv[])
     {
         parser.Parse();
 
-        std::cout << "中间码指令" << '\n';
+        std::cout << "=====中间指令=====" << '\n';
         auto& code = parser.code;
         for (size_t i = 0; i < code.size(); i++)
         {
             std::cout << i << ": " << code[i].ToString() << '\n';
         }
+        std::cout << '\n';
 
-        std::cout << "开始执行" << '\n';
+        std::cout << "=====开始执行=====" << '\n';
 
         ILInterpreter interpreter;
         auto start = std::chrono::steady_clock::now();
