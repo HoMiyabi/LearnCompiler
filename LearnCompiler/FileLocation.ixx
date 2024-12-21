@@ -14,6 +14,11 @@ public:
         return std::to_string(row) + "行" + std::to_string(column) + "列";
     }
 
+    [[nodiscard]] std::string SimpleToString() const
+    {
+        return '(' + std::to_string(row) + ',' + std::to_string(column) + ')';
+    }
+
     void ToNewline()
     {
         ++row;

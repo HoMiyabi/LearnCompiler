@@ -1,6 +1,7 @@
 ﻿module;
 #include <vector>
 #include <stdexcept>
+#include <string>
 
 export module CallProcedureNode;
 import ASTNode;
@@ -8,6 +9,8 @@ import ProcedureInfo;
 import VarInfo;
 import ILInst;
 import ILInstType;
+import ErrorUtils;
+import Token;
 
 export struct CallProcedureNode : ASTNode
 {
@@ -15,12 +18,15 @@ export struct CallProcedureNode : ASTNode
     int l;
     std::vector<ASTNode*> args;
     bool needRet;
+    Token token;
 
-    explicit CallProcedureNode(ProcedureInfo* proc, int l, std::vector<ASTNode*> args, bool needRet):
+    explicit CallProcedureNode(ProcedureInfo* proc, int l, std::vector<ASTNode*> args, bool needRet, Token token):
     ASTNode(proc->ret ? proc->ret->type : VarType::Void),
-    proc(proc), l(l),
+    proc(proc),
+    l(l),
     args(std::move(args)),
-    needRet(needRet)
+    needRet(needRet),
+    token(std::move(token))
     {
     }
 
@@ -28,8 +34,7 @@ export struct CallProcedureNode : ASTNode
     {
         if (args.size() != proc->params.size())
         {
-            throw std::runtime_error(
-                "过程参数个数不匹配");
+            ThrowSemantic(token.filePath, token.fileLocation, "过程参数个数不匹配");
         }
 
         for (auto& arg : args)
@@ -41,8 +46,8 @@ export struct CallProcedureNode : ASTNode
         {
             if (args[i]->varType != proc->params[i].type)
             {
-                throw std::runtime_error(
-                    "过程参数类型不匹配");
+                ThrowSemantic(token.filePath, token.fileLocation, "过程第" + std::to_string(i + 1) +
+                    "个参数类型不匹配");
             }
         }
         return this;
@@ -61,7 +66,7 @@ export struct CallProcedureNode : ASTNode
             reserveForRet = 0;
             if (needRet)
             {
-                throw std::runtime_error("过程需要返回值");
+                ThrowSemantic(token.filePath, token.fileLocation, "需要返回值，但过程没有返回值");
             }
         }
 

@@ -10,15 +10,18 @@ import BinaryNodeType;
 import ValueNode;
 import VarInfo;
 import ILInst;
+import Token;
+import ErrorUtils;
 
 export struct BinaryNode : ASTNode
 {
     ASTNode* left;
     ASTNode* right;
     BinaryNodeType type;
+    Token token;
 
-    explicit BinaryNode(BinaryNodeType type, ASTNode* left = nullptr, ASTNode* right = nullptr):
-    ASTNode(VarType::I32), left(left), right(right), type(type)
+    explicit BinaryNode(BinaryNodeType type, Token token, ASTNode* left = nullptr, ASTNode* right = nullptr):
+    ASTNode(VarType::I32), left(left), right(right), type(type), token(std::move(token))
     {
     }
 
@@ -32,9 +35,9 @@ export struct BinaryNode : ASTNode
         const auto it = builtInBinaryOps.find(BuiltInBinaryOp(type, left->varType, right->varType));
         if (it == builtInBinaryOps.end())
         {
-            throw std::runtime_error("不存在操作" + std::string(to_string(left->varType)) + " " +
-                std::string(to_string(type)) + " " +
-                std::string(to_string(right->varType)));
+            ThrowSemantic(std::string(token.filePath), token.fileLocation,
+                "不存在定义在类型" + std::string(to_string(left->varType)) + "和类型" +
+                std::string(to_string(right->varType)) + "上的二元操作" + std::string(to_string(type)));
         }
         auto l = dynamic_cast<ValueNode*>(left);
         auto r = dynamic_cast<ValueNode*>(right);

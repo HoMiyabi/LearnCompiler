@@ -10,14 +10,17 @@ import UnaryNodeType;
 import ValueNode;
 import ILInst;
 import VarInfo;
+import Token;
+import ErrorUtils;
 
 export struct UnaryNode : ASTNode
 {
     ASTNode* child;
     UnaryNodeType type;
+    Token token;
 
-    explicit UnaryNode(UnaryNodeType type, ASTNode* child):
-    ASTNode(VarType::I32), child(child), type(type)
+    explicit UnaryNode(UnaryNodeType type, Token token, ASTNode* child):
+    ASTNode(VarType::I32), child(child), type(type), token(std::move(token))
     {
     }
 
@@ -29,8 +32,9 @@ export struct UnaryNode : ASTNode
         const auto it = unaryNodeEvaluators.find(UnaryNodeEvaluator(type, child->varType));
         if (it == unaryNodeEvaluators.end())
         {
-            throw std::runtime_error("不存在操作" + std::string(to_string(child->varType)) + " " +
-                std::string(to_string(type)));
+            ThrowSemantic(std::string(token.filePath), token.fileLocation,
+                "不存在定义在类型" + std::string(to_string(type)) +
+                "上的一元操作" + std::string(to_string(child->varType)));
         }
         auto p = dynamic_cast<ValueNode*>(child);
         if (p)

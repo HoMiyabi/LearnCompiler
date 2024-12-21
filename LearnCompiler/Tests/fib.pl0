@@ -11,7 +11,7 @@ var ans: i32, x: i32;
     end
 
 begin
-    x := 35;
+    x := 30;
     ans := fib(x);
     write(ans);
 end

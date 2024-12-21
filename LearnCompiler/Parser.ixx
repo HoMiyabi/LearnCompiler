@@ -24,6 +24,7 @@ import VarInfo;
 import ILInstType;
 import FileLocation;
 import ILInstOprType;
+import ErrorUtils;
 
 export class Parser
 {
@@ -48,17 +49,10 @@ public:
     }
 
 private:
-
-    [[noreturn]]
-    static void ThrowMismatch(const Token& tk, const std::string& expected)
-    {
-        throw std::runtime_error(GetErrorMessage(tk, expected));
-    }
-
     [[noreturn]]
     static void ThrowMismatch(const Token& tk, const TokenKind expected)
     {
-        throw std::runtime_error(GetErrorPrefix(tk.fileLocation) +
+        ThrowSyntax(tk.filePath, tk.fileLocation,
             "预期" + std::string(to_string(expected)) +
             "，但实际为" + tk.ToString());
     }
@@ -66,7 +60,7 @@ private:
     [[noreturn]]
     static void ThrowMismatch(const Token& tk, const std::vector<TokenKind>& expected)
     {
-        std::string message = GetErrorPrefix(tk.fileLocation) + "预期";
+        std::string message = "预期";
         for (auto it = expected.begin(); it != expected.end(); ++it)
         {
             message += to_string(*it);
@@ -76,18 +70,18 @@ private:
             }
         }
         message += "，但实际为" + tk.ToString();
-        throw std::runtime_error(message);
+        ThrowSyntax(tk.filePath, tk.fileLocation, message);
     }
 
     [[noreturn]]
-    static void ThrowEOF(const TokenKind excepted)
+    void ThrowEOF(const TokenKind excepted)
     {
         std::string message = "预期" + std::string(to_string(excepted)) + "，但已经到达文件尾部";
-        throw std::runtime_error(message);
+        ThrowSyntax(tokenizer.filePath, tokenizer.fileLocation, message);
     }
 
     [[noreturn]]
-    static void ThrowEOF(const std::vector<TokenKind>& excepted)
+    void ThrowEOF(const std::vector<TokenKind>& excepted)
     {
         std::string message = "预期";
         for (auto it = excepted.begin(); it != excepted.end(); ++it)
@@ -99,18 +93,13 @@ private:
             }
         }
         message += "，但已经到达文件尾部";
-        throw std::runtime_error(message);
+        ThrowSyntax(tokenizer.filePath, tokenizer.fileLocation, message);
     }
 
-    std::string static GetErrorPrefix(const FileLocation location)
-    {
-        return "[语法错误] 位于" + location.ToString() + ": ";
-    }
-
-    std::string static GetErrorMessage(const Token& tk, const std::string& expected)
-    {
-        return GetErrorPrefix(tk.fileLocation) + "预期" + expected + "，但实际为" + tk.ToString();
-    }
+    // std::string static GetErrorPrefix(const FileLocation location)
+    // {
+    //     return "[语法错误] 位于" + location.ToString() + ": ";
+    // }
 
     Token Match(const TokenKind kind)
     {
@@ -155,7 +144,7 @@ private:
             return std::nullopt;
         }
 
-        auto tk = *token;
+        Token tk = *token;
 
         token = tokenizer.GetToken();
         return tk;
@@ -171,16 +160,7 @@ private:
         return token && std::ranges::find(expected, token->kind) != expected.end();
     }
 
-    Token Current()
-    {
-        if (!token.has_value())
-        {
-            throw std::runtime_error("预期下一个Token, 但已经到达文件尾部");
-        }
-        return token.value();
-    }
-
-    const Token& Current(const std::vector<TokenKind>& excepted)
+    Token Current(const std::vector<TokenKind>& excepted)
     {
         if (!token)
         {
@@ -191,20 +171,10 @@ private:
         {
             if (token->kind == *it)
             {
-                token = tokenizer.GetToken();
                 return *token;
             }
         }
         ThrowMismatch(*token, excepted);
-    }
-
-    const Token& Current(const std::string& expected)
-    {
-        if (!token.has_value())
-        {
-            throw std::runtime_error("预期" + expected + ", 但已经到达文件尾部");
-        }
-        return token.value();
     }
 
     void MoveNext()
@@ -218,7 +188,7 @@ private:
         Token tkName = Match(TokenKind::Identifier);
         Match(TokenKind::Semi);
 
-        auto program = ProcedureInfo(0, tkName.String());
+        auto program = ProcedureInfo(0, tkName.rawText);
         path.push_back(&program);
         Block();
         path.pop_back();
@@ -296,12 +266,12 @@ private:
     void GenConst(const Token& tkId, const Token& tkLiteral)
     {
         ProcedureInfo& procedure = *path.back();
-        if (ProcedureContainsVar(procedure, tkId.String()))
+        if (ProcedureContainsVar(procedure, tkId.rawText))
         {
-            throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() + "重复定义");
+            ThrowSemantic(tkId.filePath, tkId.fileLocation, tkId.rawText + "重复定义");
         }
 
-        VarInfo varInfo(true, VarType::I32, tkId.String(), procedure.vars.size());
+        VarInfo varInfo(true, VarType::I32, tkId.rawText, procedure.vars.size());
         if (tkLiteral.kind == TokenKind::Int32)
         {
             varInfo.type = VarType::I32;
@@ -333,11 +303,11 @@ private:
     void GenOneVardecl(const Token& tkId, const Token& tkType)
     {
         ProcedureInfo& procedure = *path.back();
-        if (ProcedureContainsVar(procedure, tkId.String()))
+        if (ProcedureContainsVar(procedure, tkId.rawText))
         {
-            throw std::runtime_error(GetErrorPrefix(tkId.fileLocation) + tkId.String() + "重复定义");
+            ThrowSemantic(tkId.filePath, tkId.fileLocation, tkId.rawText + "重复定义");
         }
-        VarInfo varInfo(false, VarType::I32, tkId.String(), procedure.vars.size());
+        VarInfo varInfo(false, VarType::I32, tkId.rawText, procedure.vars.size());
         if (tkType.kind == TokenKind::I32)
         {
             varInfo.type = VarType::I32;
@@ -381,7 +351,7 @@ private:
                 Token tkId = Match(TokenKind::Identifier);
                 Match(TokenKind::Colon);
                 Token tkType = Match({TokenKind::I32, TokenKind::F32});
-                VarInfo varInfo(false, VarType::I32, tkId.String(), params.size());
+                VarInfo varInfo(false, VarType::I32, tkId.rawText, params.size());
                 if (tkType.kind == TokenKind::F32)
                 {
                     varInfo.type = VarType::F32;
@@ -406,15 +376,15 @@ private:
         // Gen
         ProcedureInfo& procedure = *path.back();
 
-        ProcedureInfo subProcedure(code.size(),tkProcName.String());
+        ProcedureInfo subProcedure(code.size(),tkProcName.rawText);
 
-        if (tkProcName.String() == procedure.name ||
+        if (tkProcName.rawText == procedure.name ||
             std::ranges::find_if(procedure.subProcedures, [&](auto& subProc)
             {
-                return subProc.name == tkProcName.String();
+                return subProc.name == tkProcName.rawText;
             }) != procedure.subProcedures.end())
         {
-            throw std::runtime_error(GetErrorPrefix(tkProcName.fileLocation) + tkProcName.String() + "过程重复定义");
+            ThrowSemantic(tkProcName.filePath, tkProcName.fileLocation, tkProcName.rawText + "过程重复定义");
         }
 
         for (int i = 0; i < params.size(); i++)
@@ -459,7 +429,7 @@ private:
                     procedure->subProcedures,
                     [&](auto& subProcedure)
                     {
-                        return subProcedure.name == tk.String();
+                        return subProcedure.name == tk.rawText;
                     });
                 it1 != procedure->subProcedures.end())
             {
@@ -468,7 +438,7 @@ private:
             }
             l++;
         }
-        throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + tk.String() + "过程未定义");
+        ThrowSemantic(tk.filePath, tk.fileLocation, tk.rawText + "过程未定义");
     }
 
     CallProcedureNode* CallProcedure(const Token& tkId, bool needRet)
@@ -485,7 +455,7 @@ private:
             } while (TryMatch(TokenKind::Comma));
             Match(TokenKind::RParen);
         }
-        return new CallProcedureNode(&proc, l, std::move(args), needRet);
+        return new CallProcedureNode(&proc, l, std::move(args), needRet, tkId);
     }
 
 /*
@@ -502,7 +472,14 @@ private:
     {
         ProcedureInfo& procedure = *path.back();
 
-        Token tk = Current("statement");
+        Token tk = Current({TokenKind::Identifier,
+            TokenKind::If,
+            TokenKind::While,
+            TokenKind::Begin,
+            TokenKind::Read,
+            TokenKind::Write,
+            TokenKind::Return});
+
         if (tk.kind == TokenKind::Identifier)
         {
             MoveNext();
@@ -517,8 +494,7 @@ private:
                 const VarInfo& varInfo = GetVar(tk, &l);
                 if (node->varType != varInfo.type)
                 {
-                    throw std::runtime_error(GetErrorPrefix(tk.fileLocation) +
-                        "不能将" + to_string(node->varType) + "赋值给" + to_string(varInfo.type));
+                    ThrowSemantic(tk.filePath, tk.fileLocation, "类型不匹配");
                 }
                 node->GenerateCode(code);
                 SAFE_DELETE(node);
@@ -537,7 +513,7 @@ private:
             node = node->CalTypeAndOptimize();
             if (node->varType != VarType::I32)
             {
-                throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "条件表达式类型必须为i32");
+                ThrowSemantic(tk.filePath, tk.fileLocation, "条件表达式类型必须为i32");
             }
             node->GenerateCode(code);
             SAFE_DELETE(node);
@@ -568,7 +544,7 @@ private:
             node = node->CalTypeAndOptimize();
             if (node->varType != VarType::I32)
             {
-                throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "条件表达式类型必须为i32");
+                ThrowSemantic(tk.filePath, tk.fileLocation, "条件表达式类型必须为i32");
             }
             node->GenerateCode(code);
             SAFE_DELETE(node);
@@ -625,7 +601,7 @@ private:
                 }
                 else
                 {
-                    throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "write()参数类型错误");
+                    ThrowSemantic(tk.filePath, tk.fileLocation, "write()参数类型错误");
                 }
 
                 SAFE_DELETE(node);
@@ -640,7 +616,7 @@ private:
             {
                 if (procedure.ret)
                 {
-                    throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "过程需要返回值");
+                    ThrowSemantic(tk.filePath, tk.fileLocation, "过程声明需要返回值");
                 }
                 GenPopVars();
                 code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Ret));
@@ -652,14 +628,14 @@ private:
 
                 if (!procedure.ret)
                 {
-                    throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "过程没有返回值");
+                    ThrowSemantic(tk.filePath, tk.fileLocation, "过程声明没有返回值");
                 }
 
                 node = node->CalTypeAndOptimize();
 
                 if (node->varType != procedure.ret->type)
                 {
-                    throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "返回值类型不匹配");
+                    ThrowSemantic(tk.filePath, tk.fileLocation, "返回值类型不匹配");
                 }
                 node->GenerateCode(code);
                 SAFE_DELETE(node);
@@ -671,7 +647,7 @@ private:
         }
         else
         {
-            throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "Statement错误");
+            ThrowSyntax(tk.filePath, tk.fileLocation, "Statement错误");
         }
     }
 
@@ -691,7 +667,7 @@ private:
         if (auto tk = TryMatch(TokenKind::Odd))
         {
             auto node = Exp();
-            return new UnaryNode(UnaryNodeType::Odd, node);
+            return new UnaryNode(UnaryNodeType::Odd, std::move(*tk), node);
         }
         auto node1 = Exp();
         auto nodeLop = Lop();
@@ -706,19 +682,15 @@ private:
     // Expression
     ASTNode* Exp()
     {
-        bool flag = false;
-        if (TryMatch(TokenKind::Minus))
-        {
-            flag = true;
-        }
-        else
+        auto tk = TryMatch(TokenKind::Minus);
+        if (!tk)
         {
             TryMatch(TokenKind::Plus);
         }
         auto node1 = Term();
-        if (flag)
+        if (tk)
         {
-            node1 = new UnaryNode(UnaryNodeType::Neg, node1);
+            node1 = new UnaryNode(UnaryNodeType::Neg, std::move(*tk), node1);
         }
         while (TryCurrent({TokenKind::Plus, TokenKind::Minus}))
         {
@@ -762,7 +734,7 @@ private:
             TokenKind::LParen,
             TokenKind::I32,
             TokenKind::F32};
-        const Token tk = Match(excepted);
+        Token tk = Match(excepted);
 
         if (tk.kind == TokenKind::Identifier)
         {
@@ -800,14 +772,14 @@ private:
             Match(TokenKind::LParen);
             ASTNode* node = Exp();
             Match(TokenKind::RParen);
-            return new UnaryNode(UnaryNodeType::ToI32, node);
+            return new UnaryNode(UnaryNodeType::ToI32, std::move(tk), node);
         }
         if (tk.kind == TokenKind::F32)
         {
             Match(TokenKind::LParen);
             auto node = Exp();
             Match(TokenKind::RParen);
-            return new UnaryNode(UnaryNodeType::ToF32, node);
+            return new UnaryNode(UnaryNodeType::ToF32, std::move(tk), node);
         }
     }
 
@@ -821,19 +793,19 @@ private:
         switch (tk.kind)
         {
         case TokenKind::Equal:
-            return new BinaryNode(BinaryNodeType::Eql);
+            return new BinaryNode(BinaryNodeType::Eql, std::move(tk));
         case TokenKind::LessGreater:
-            return new BinaryNode(BinaryNodeType::Neq);
+            return new BinaryNode(BinaryNodeType::Neq, std::move(tk));
         case TokenKind::Less:
-            return new BinaryNode(BinaryNodeType::Lss);
+            return new BinaryNode(BinaryNodeType::Lss, std::move(tk));
         case TokenKind::LessEqual:
-            return new BinaryNode(BinaryNodeType::Leq);
+            return new BinaryNode(BinaryNodeType::Leq, std::move(tk));
         case TokenKind::Greater:
-            return new BinaryNode(BinaryNodeType::Gtr);
+            return new BinaryNode(BinaryNodeType::Gtr, std::move(tk));
         case TokenKind::GreaterEqual:
-            return new BinaryNode(BinaryNodeType::Geq);
+            return new BinaryNode(BinaryNodeType::Geq, std::move(tk));
         default:
-            throw std::runtime_error(GetErrorPrefix(tk.fileLocation) + "Lop错误");
+            ThrowSyntax(tk.filePath, tk.fileLocation, "Lop错误");
         }
     }
 
@@ -843,9 +815,9 @@ private:
         const auto tk = Match({TokenKind::Plus, TokenKind::Minus});
         if (tk.kind == TokenKind::Plus)
         {
-            return new BinaryNode(BinaryNodeType::Add);
+            return new BinaryNode(BinaryNodeType::Add, std::move(tk));
         }
-        return new BinaryNode(BinaryNodeType::Sub);
+        return new BinaryNode(BinaryNodeType::Sub, std::move(tk));
     }
 
     // <mop> -> *|/
@@ -854,15 +826,15 @@ private:
         const auto tk = Match({TokenKind::Star, TokenKind::Slash});
         if (tk.kind == TokenKind::Star)
         {
-            return new BinaryNode(BinaryNodeType::Mul);
+            return new BinaryNode(BinaryNodeType::Mul, std::move(tk));
         }
-        return new BinaryNode(BinaryNodeType::Div);
+        return new BinaryNode(BinaryNodeType::Div, std::move(tk));
     }
 
     const VarInfo& GetVar(const Token& tkVar, int* pL)
     {
         int l = 0;
-        const std::string& name = tkVar.String();
+        const std::string& name = tkVar.rawText;
         for (auto procIt = path.rbegin(); procIt != path.rend(); ++procIt)
         {
             const auto& vars = (*procIt)->vars;
@@ -890,6 +862,6 @@ private:
 
             l++;
         }
-        throw std::runtime_error(GetErrorPrefix(tkVar.fileLocation) + tkVar.String() + "未定义");
+        ThrowSyntax(tkVar.filePath, tkVar.fileLocation, "未定义变量" + name);
     }
 };

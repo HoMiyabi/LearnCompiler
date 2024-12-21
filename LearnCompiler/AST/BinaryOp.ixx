@@ -49,152 +49,149 @@ export struct BuiltInBinaryOpHasher
     }
 };
 
-export
+// i32
+ValueNode* EvalAdd(ValueNode* node1, ValueNode* node2)
 {
-    // i32
-    ValueNode* EvalAdd(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<int32_t>(node1->value) + std::get<int32_t>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalSub(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<int32_t>(node1->value) - std::get<int32_t>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalMul(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<int32_t>(node1->value) * std::get<int32_t>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalDiv(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<int32_t>(node1->value) / std::get<int32_t>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalEql(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<int32_t>(node1->value) == std::get<int32_t>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalNeq(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<int32_t>(node1->value) != std::get<int32_t>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalLss(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<int32_t>(node1->value) < std::get<int32_t>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalLeq(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<int32_t>(node1->value) <= std::get<int32_t>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalGtr(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<int32_t>(node1->value) > std::get<int32_t>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalGeq(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<int32_t>(node1->value) >= std::get<int32_t>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    // f32
-    ValueNode* EvalFAdd(ValueNode* node1, ValueNode* node2)
-    {
-        float value = std::get<float>(node1->value) + std::get<float>(node2->value);
-        return new ValueNode(VarType::F32, value);
-    }
-
-    ValueNode* EvalFSub(ValueNode* node1, ValueNode* node2)
-    {
-        float value = std::get<float>(node1->value) - std::get<float>(node2->value);
-        return new ValueNode(VarType::F32, value);
-    }
-
-    ValueNode* EvalFMul(ValueNode* node1, ValueNode* node2)
-    {
-        float value = std::get<float>(node1->value) * std::get<float>(node2->value);
-        return new ValueNode(VarType::F32, value);
-    }
-
-    ValueNode* EvalFDiv(ValueNode* node1, ValueNode* node2)
-    {
-        float value = std::get<float>(node1->value) / std::get<float>(node2->value);
-        return new ValueNode(VarType::F32, value);
-    }
-
-    ValueNode* EvalFEql(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<float>(node1->value) == std::get<float>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalFNeq(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<float>(node1->value) != std::get<float>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalFLss(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<float>(node1->value) < std::get<float>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalFLeq(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<float>(node1->value) <= std::get<float>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalFGtr(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<float>(node1->value) > std::get<float>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    ValueNode* EvalFGeq(ValueNode* node1, ValueNode* node2)
-    {
-        int32_t value = std::get<float>(node1->value) >= std::get<float>(node2->value);
-        return new ValueNode(VarType::I32, value);
-    }
-
-    std::unordered_set<BuiltInBinaryOp, BuiltInBinaryOpHasher> builtInBinaryOps
-    {
-        {BinaryNodeType::Add, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Add), EvalAdd},
-        {BinaryNodeType::Sub, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Sub), EvalSub},
-        {BinaryNodeType::Mul, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Mul), EvalMul},
-        {BinaryNodeType::Div, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Div), EvalDiv},
-        {BinaryNodeType::Eql, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Eql), EvalEql},
-        {BinaryNodeType::Neq, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Neq), EvalNeq},
-        {BinaryNodeType::Lss, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Lss), EvalLss},
-        {BinaryNodeType::Leq, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Leq), EvalLeq},
-        {BinaryNodeType::Gtr, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Gtr), EvalGtr},
-        {BinaryNodeType::Geq, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Geq), EvalGeq},
-
-        {BinaryNodeType::Add, VarType::F32, VarType::F32, VarType::F32, ILInst(ILInstOprType::FAdd), EvalFAdd},
-        {BinaryNodeType::Sub, VarType::F32, VarType::F32, VarType::F32, ILInst(ILInstOprType::FSub), EvalFSub},
-        {BinaryNodeType::Mul, VarType::F32, VarType::F32, VarType::F32, ILInst(ILInstOprType::FMul), EvalFMul},
-        {BinaryNodeType::Div, VarType::F32, VarType::F32, VarType::F32, ILInst(ILInstOprType::FDiv), EvalFDiv},
-        {BinaryNodeType::Eql, VarType::F32, VarType::F32, VarType::I32, ILInst(ILInstOprType::FEql), EvalFEql},
-        {BinaryNodeType::Neq, VarType::F32, VarType::F32, VarType::I32, ILInst(ILInstOprType::FNeq), EvalFNeq},
-        {BinaryNodeType::Lss, VarType::F32, VarType::F32, VarType::I32, ILInst(ILInstOprType::FLss), EvalFLss},
-        {BinaryNodeType::Leq, VarType::F32, VarType::F32, VarType::I32, ILInst(ILInstOprType::FLeq), EvalFLeq},
-        {BinaryNodeType::Gtr, VarType::F32, VarType::F32, VarType::I32, ILInst(ILInstOprType::FGtr), EvalFGtr},
-        {BinaryNodeType::Geq, VarType::F32, VarType::F32, VarType::I32, ILInst(ILInstOprType::FGeq), EvalFGeq},
-    };
+    int32_t value = std::get<int32_t>(node1->value) + std::get<int32_t>(node2->value);
+    return new ValueNode(VarType::I32, value);
 }
+
+ValueNode* EvalSub(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<int32_t>(node1->value) - std::get<int32_t>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+ValueNode* EvalMul(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<int32_t>(node1->value) * std::get<int32_t>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+ValueNode* EvalDiv(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<int32_t>(node1->value) / std::get<int32_t>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+ValueNode* EvalEql(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<int32_t>(node1->value) == std::get<int32_t>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+ValueNode* EvalNeq(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<int32_t>(node1->value) != std::get<int32_t>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+ValueNode* EvalLss(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<int32_t>(node1->value) < std::get<int32_t>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+ValueNode* EvalLeq(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<int32_t>(node1->value) <= std::get<int32_t>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+ValueNode* EvalGtr(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<int32_t>(node1->value) > std::get<int32_t>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+ValueNode* EvalGeq(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<int32_t>(node1->value) >= std::get<int32_t>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+// f32
+ValueNode* EvalFAdd(ValueNode* node1, ValueNode* node2)
+{
+    float value = std::get<float>(node1->value) + std::get<float>(node2->value);
+    return new ValueNode(VarType::F32, value);
+}
+
+ValueNode* EvalFSub(ValueNode* node1, ValueNode* node2)
+{
+    float value = std::get<float>(node1->value) - std::get<float>(node2->value);
+    return new ValueNode(VarType::F32, value);
+}
+
+ValueNode* EvalFMul(ValueNode* node1, ValueNode* node2)
+{
+    float value = std::get<float>(node1->value) * std::get<float>(node2->value);
+    return new ValueNode(VarType::F32, value);
+}
+
+ValueNode* EvalFDiv(ValueNode* node1, ValueNode* node2)
+{
+    float value = std::get<float>(node1->value) / std::get<float>(node2->value);
+    return new ValueNode(VarType::F32, value);
+}
+
+ValueNode* EvalFEql(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<float>(node1->value) == std::get<float>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+ValueNode* EvalFNeq(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<float>(node1->value) != std::get<float>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+ValueNode* EvalFLss(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<float>(node1->value) < std::get<float>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+ValueNode* EvalFLeq(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<float>(node1->value) <= std::get<float>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+ValueNode* EvalFGtr(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<float>(node1->value) > std::get<float>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+ValueNode* EvalFGeq(ValueNode* node1, ValueNode* node2)
+{
+    int32_t value = std::get<float>(node1->value) >= std::get<float>(node2->value);
+    return new ValueNode(VarType::I32, value);
+}
+
+export std::unordered_set<BuiltInBinaryOp, BuiltInBinaryOpHasher> builtInBinaryOps
+{
+    {BinaryNodeType::Add, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Add), EvalAdd},
+    {BinaryNodeType::Sub, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Sub), EvalSub},
+    {BinaryNodeType::Mul, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Mul), EvalMul},
+    {BinaryNodeType::Div, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Div), EvalDiv},
+    {BinaryNodeType::Eql, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Eql), EvalEql},
+    {BinaryNodeType::Neq, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Neq), EvalNeq},
+    {BinaryNodeType::Lss, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Lss), EvalLss},
+    {BinaryNodeType::Leq, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Leq), EvalLeq},
+    {BinaryNodeType::Gtr, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Gtr), EvalGtr},
+    {BinaryNodeType::Geq, VarType::I32, VarType::I32, VarType::I32, ILInst(ILInstOprType::Geq), EvalGeq},
+
+    {BinaryNodeType::Add, VarType::F32, VarType::F32, VarType::F32, ILInst(ILInstOprType::FAdd), EvalFAdd},
+    {BinaryNodeType::Sub, VarType::F32, VarType::F32, VarType::F32, ILInst(ILInstOprType::FSub), EvalFSub},
+    {BinaryNodeType::Mul, VarType::F32, VarType::F32, VarType::F32, ILInst(ILInstOprType::FMul), EvalFMul},
+    {BinaryNodeType::Div, VarType::F32, VarType::F32, VarType::F32, ILInst(ILInstOprType::FDiv), EvalFDiv},
+    {BinaryNodeType::Eql, VarType::F32, VarType::F32, VarType::I32, ILInst(ILInstOprType::FEql), EvalFEql},
+    {BinaryNodeType::Neq, VarType::F32, VarType::F32, VarType::I32, ILInst(ILInstOprType::FNeq), EvalFNeq},
+    {BinaryNodeType::Lss, VarType::F32, VarType::F32, VarType::I32, ILInst(ILInstOprType::FLss), EvalFLss},
+    {BinaryNodeType::Leq, VarType::F32, VarType::F32, VarType::I32, ILInst(ILInstOprType::FLeq), EvalFLeq},
+    {BinaryNodeType::Gtr, VarType::F32, VarType::F32, VarType::I32, ILInst(ILInstOprType::FGtr), EvalFGtr},
+    {BinaryNodeType::Geq, VarType::F32, VarType::F32, VarType::I32, ILInst(ILInstOprType::FGeq), EvalFGeq},
+};

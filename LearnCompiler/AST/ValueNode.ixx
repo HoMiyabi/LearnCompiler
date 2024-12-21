@@ -16,11 +16,6 @@ export struct ValueNode : ASTNode
     {
     }
 
-    ASTNode* CalTypeAndOptimize() override
-    {
-        return this;
-    }
-
     void GenerateCode(std::vector<ILInst>& code) override
     {
         if (varType == VarType::I32)
@@ -32,9 +27,4 @@ export struct ValueNode : ASTNode
             code.push_back(ILInst::LIT(std::get<float>(value)));
         }
     };
-
-    ~ValueNode() override
-    {
-
-    }
 };

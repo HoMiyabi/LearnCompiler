@@ -34,6 +34,17 @@ export struct UnaryNodeEvaluator
     }
 };
 
+export struct UnaryNodeEvaluatorHasher
+{
+    std::size_t operator()(const UnaryNodeEvaluator& op) const
+    {
+        std::hash<int32_t> h;
+        return
+            h(static_cast<int32_t>(op.type)) ^
+            h(static_cast<int32_t>(op.t));
+    }
+};
+
 ValueNode* EvalNeg(ValueNode* node)
 {
     return new ValueNode(VarType::I32, -std::get<int32_t>(node->value));
@@ -58,17 +69,6 @@ ValueNode* EvalToF32(ValueNode* node)
 {
     return new ValueNode(VarType::F32, static_cast<float>(std::get<int32_t>(node->value)));
 }
-
-struct UnaryNodeEvaluatorHasher
-{
-    std::size_t operator()(const UnaryNodeEvaluator& op) const
-    {
-        std::hash<int32_t> h;
-        return
-            h(static_cast<int32_t>(op.type)) ^
-            h(static_cast<int32_t>(op.t));
-    }
-};
 
 export std::unordered_set<UnaryNodeEvaluator, UnaryNodeEvaluatorHasher> unaryNodeEvaluators
 {

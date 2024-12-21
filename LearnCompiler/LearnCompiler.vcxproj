@@ -162,11 +162,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ErrorUtils.ixx" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Parser.ixx" />
     <ClCompile Include="CharUtils.ixx" />
     <ClCompile Include="ProcedureInfo.ixx" />
-    <ClCompile Include="ThirdParty\magic_enum.ixx" />
     <ClCompile Include="VarInfo.ixx" />
     <ClCompile Include="FileLocation.ixx" />
     <ClCompile Include="FileUtils.ixx" />
@@ -190,15 +190,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PtrHelper.h" />
-    <ClInclude Include="include\magic_enum\magic_enum.hpp" />
-    <ClInclude Include="include\magic_enum\magic_enum_all.hpp" />
-    <ClInclude Include="include\magic_enum\magic_enum_containers.hpp" />
-    <ClInclude Include="include\magic_enum\magic_enum_flags.hpp" />
-    <ClInclude Include="include\magic_enum\magic_enum_format.hpp" />
-    <ClInclude Include="include\magic_enum\magic_enum_fuse.hpp" />
-    <ClInclude Include="include\magic_enum\magic_enum_iostream.hpp" />
-    <ClInclude Include="include\magic_enum\magic_enum_switch.hpp" />
-    <ClInclude Include="include\magic_enum\magic_enum_utility.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tests\eval.pl0" />

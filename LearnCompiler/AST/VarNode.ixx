@@ -17,17 +17,8 @@ export struct VarNode : ASTNode
     {
     }
 
-    ASTNode* CalTypeAndOptimize() override
-    {
-        return this;
-    }
     void GenerateCode(std::vector<ILInst>& code) override
     {
         code.emplace_back(ILInstType::LOD, 0, varInfo->runtimeAddress);
-    }
-
-    ~VarNode() override
-    {
-
     }
 };

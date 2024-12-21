@@ -10,24 +10,22 @@ export class Token
 {
 public:
     TokenKind kind;
-    std::variant<std::string, int32_t, float> value;
+    std::variant<int32_t, float> value;
     FileLocation fileLocation;
+    std::string rawText;
+    std::string_view filePath;
 
     Token() = default;
 
-    Token(const FileLocation fileLocation, const TokenKind kind): kind(kind), fileLocation(fileLocation)
+    Token(const FileLocation fileLocation, const TokenKind kind, std::string rawText, const std::string_view filePath):
+    kind(kind), fileLocation(fileLocation), rawText(std::move(rawText)), filePath(filePath)
     {
     }
 
-    Token(const FileLocation fileLocation, const TokenKind kind, std::variant<std::string, int, float> value):
-    kind(kind), value(std::move(value)), fileLocation(fileLocation)
+    Token(const FileLocation fileLocation, const TokenKind kind, std::variant<int, float> value,
+        std::string rawText, const std::string_view filePath):
+    kind(kind), value(std::move(value)), fileLocation(fileLocation), rawText(std::move(rawText)), filePath(filePath)
     {
-    }
-
-    [[nodiscard]]
-    const std::string& String() const
-    {
-        return std::get<std::string>(value);
     }
 
     [[nodiscard]]
@@ -54,7 +52,7 @@ public:
         else if (kind == TokenKind::Identifier)
         {
             text += ' ';
-            text += std::get<std::string>(value);
+            text += rawText;
         }
         return text;
     }

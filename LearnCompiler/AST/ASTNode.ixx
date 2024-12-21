@@ -13,7 +13,10 @@ export struct ASTNode
     {
     }
 
-    virtual ASTNode* CalTypeAndOptimize() = 0;
+    virtual ASTNode* CalTypeAndOptimize()
+    {
+        return this;
+    }
     virtual void GenerateCode(std::vector<ILInst>& code) = 0;
     virtual ~ASTNode()
     {
