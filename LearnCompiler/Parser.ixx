@@ -74,14 +74,14 @@ private:
     }
 
     [[noreturn]]
-    void ThrowEOF(const TokenKind excepted)
+    void ThrowEOF(const TokenKind excepted) const
     {
         std::string message = "预期" + std::string(to_string(excepted)) + "，但已经到达文件尾部";
         ThrowSyntax(tokenizer.filePath, tokenizer.fileLocation, message);
     }
 
     [[noreturn]]
-    void ThrowEOF(const std::vector<TokenKind>& excepted)
+    void ThrowEOF(const std::vector<TokenKind>& excepted) const
     {
         std::string message = "预期";
         for (auto it = excepted.begin(); it != excepted.end(); ++it)
@@ -160,7 +160,7 @@ private:
         return token && std::ranges::find(expected, token->kind) != expected.end();
     }
 
-    Token Current(const std::vector<TokenKind>& excepted)
+    Token Current(const std::vector<TokenKind>& excepted) const
     {
         if (!token)
         {
@@ -263,7 +263,7 @@ private:
         GenConst(tkId, tkLiteral);
     }
 
-    void GenConst(const Token& tkId, const Token& tkLiteral)
+    void GenConst(const Token& tkId, const Token& tkLiteral) const
     {
         ProcedureInfo& procedure = *path.back();
         if (ProcedureContainsVar(procedure, tkId.rawText))
@@ -300,7 +300,7 @@ private:
         Match(TokenKind::Semi);
     }
 
-    void GenOneVardecl(const Token& tkId, const Token& tkType)
+    void GenOneVardecl(const Token& tkId, const Token& tkType) const
     {
         ProcedureInfo& procedure = *path.back();
         if (ProcedureContainsVar(procedure, tkId.rawText))
@@ -781,6 +781,7 @@ private:
             Match(TokenKind::RParen);
             return new UnaryNode(UnaryNodeType::ToF32, std::move(tk), node);
         }
+        ThrowSyntax(tk.filePath, tk.fileLocation, "Factor错误");
     }
 
     // <lop> -> =|<>|<|<=|>|>=

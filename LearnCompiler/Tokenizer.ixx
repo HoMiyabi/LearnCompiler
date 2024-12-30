@@ -20,7 +20,7 @@ public:
 
 public:
     explicit Tokenizer(std::string filePath, std::string text):
-    filePath(filePath), text(std::move(text))
+    filePath(std::move(filePath)), text(std::move(text))
     {
         iterator = this->text.begin();
         ProcessBOM();
