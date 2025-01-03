@@ -28,27 +28,23 @@ public:
 
     std::optional<Token> GetToken()
     {
-        while (true)
+        SkipSpaceComment();
+
+        if (IsEnd())
         {
-            if (IsEnd())
-            {
-                return std::nullopt;
-            }
-            if (!IsSpace(Current()))
-            {
-                break;
-            }
-            MoveNext();
+            return std::nullopt;
         }
 
         if (IsLetter(Current()))
         {
             return HandleKeywordOrIdentifier();
         }
+
         if (IsDigit(Current()))
         {
             return HandleLiteral();
         }
+
         if (IsPlusOrMinus(Current()))
         {
             auto next = iterator + 1;
@@ -57,14 +53,49 @@ public:
                 return HandleLiteral();
             }
         }
+
         if (startingPunctuators.contains(Current()))
         {
             return HandlePunctuator();
         }
+
         ThrowLexical(filePath, fileLocation, "未定义的字符" + Current());
     }
 
 private:
+    void SkipSpaceComment()
+    {
+        while (true)
+        {
+            if (IsEnd())
+            {
+                return;
+            }
+            if (Current() == '#')
+            {
+                MoveNext();
+                while (true)
+                {
+                    if (IsEnd())
+                    {
+                        return;
+                    }
+                    if (IsNewline(Current()))
+                    {
+                        MoveNext();
+                        break;
+                    }
+                    MoveNext();
+                }
+            }
+            if (!IsSpace(Current()))
+            {
+                return;
+            }
+            MoveNext();
+        }
+    }
+
     void ProcessBOM()
     {
         if (text.size() >= 3 && text[0] == '\xEF' && text[1] == '\xBB' && text[2] == '\xBF')

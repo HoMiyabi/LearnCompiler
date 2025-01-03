@@ -1,4 +1,4 @@
-﻿program fibtest;
+﻿program testfib; # 求斐波那契数列第30项
 var ans: i32, x: i32;
 
     procedure fib(n: i32): i32

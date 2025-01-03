@@ -1,4 +1,4 @@
-﻿program testf;
+﻿program testsqrt; # 求平方根
 var a: f32;
 
     procedure abs(x: f32): f32

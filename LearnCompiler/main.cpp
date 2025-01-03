@@ -6,17 +6,23 @@ import Tokenizer;
 import Parser;
 import ILInterpreter;
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
     if (argc != 2)
     {
-        std::cout << "请输入文件名\n";
+        std::cout << "用法：" << argv[0] << " 文件名\n";
         return 0;
     }
-    std::string fileName(argv[1]);
-    auto text = ReadFile(fileName);
+    const char* filename = argv[1];
+    auto text = ReadFile(filename);
 
-    Tokenizer tokenizer(fileName, std::move(text));
+    if (!text)
+    {
+        std::cout << "文件" << filename << "无法打开\n";
+        return 0;
+    }
+
+    Tokenizer tokenizer(filename, std::move(*text));
     Parser parser(tokenizer);
 
     // parser.Parse();
@@ -38,7 +44,16 @@ int main(int argc, char* argv[])
         auto start = std::chrono::steady_clock::now();
         interpreter.Interpret(code);
         auto end = std::chrono::steady_clock::now();
-        std::cout << "程序耗时: " <<std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms\n";
+
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        if (ms >= 10000)
+        {
+            std::cout << "程序耗时: " << ms / 1000.0 << "s\n";
+        }
+        else
+        {
+            std::cout << "程序耗时: " << ms << "ms\n";
+        }
     }
     catch (const std::exception& e)
     {
