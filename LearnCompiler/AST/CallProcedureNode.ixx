@@ -34,7 +34,11 @@ export struct CallProcedureNode : ASTNode
     {
         if (args.size() != proc->params.size())
         {
-            ThrowSemantic(token.filePath, token.fileLocation, "过程参数个数不匹配");
+            ThrowSemantic(token.filePath, token.fileLocation,
+                std::string("调用过程") + token.rawText +
+                "参数个数不匹配，" +
+                "形参有" + std::to_string(proc->params.size()) + "个，" +
+                "实参有" + std::to_string(args.size()) + "个");
         }
 
         for (auto& arg : args)
@@ -46,8 +50,11 @@ export struct CallProcedureNode : ASTNode
         {
             if (args[i]->varType != proc->params[i].type)
             {
-                ThrowSemantic(token.filePath, token.fileLocation, "过程第" + std::to_string(i + 1) +
-                    "个参数类型不匹配");
+                ThrowSemantic(token.filePath, token.fileLocation,
+                    std::string("调用过程") + token.rawText +
+                    "第" + std::to_string(i + 1) + "个参数类型不匹配，" +
+                    "形参类型为" + to_string(proc->params[i].type) + "，" +
+                    "实参类型为" + to_string(args[i]->varType));
             }
         }
         return this;
@@ -66,7 +73,8 @@ export struct CallProcedureNode : ASTNode
             reserveForRet = 0;
             if (needRet)
             {
-                ThrowSemantic(token.filePath, token.fileLocation, "需要返回值，但过程没有返回值");
+                ThrowSemantic(token.filePath, token.fileLocation,
+                    "需要返回值，但过程" + token.rawText + "没有返回值");
             }
         }
 

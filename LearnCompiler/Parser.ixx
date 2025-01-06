@@ -286,7 +286,7 @@ private:
         procedure.vars.push_back(varInfo);
     }
 
-    // <vardecl> -> var <id>:<id>{,<id>:<id>};
+    // <vardecl> -> var <id>:<type>{,<id>:<type>};
     void Vardecl()
     {
         Match(TokenKind::Var);
@@ -486,7 +486,7 @@ private:
             auto tk1 = Match({TokenKind::ColonEqual, TokenKind::LParen});
             if (tk1.kind == TokenKind::ColonEqual)
             {
-                auto node = Exp();
+                ASTNode* node(Exp());
                 Match(TokenKind::Semi);
 
                 node = node->CalTypeAndOptimize();
@@ -498,13 +498,16 @@ private:
                         to_string(node->varType) + "赋值给类型" + to_string(varInfo.type));
                 }
                 node->GenerateCode(code);
-                SAFE_DELETE(node);
+
                 code.emplace_back(ILInstType::STO, l, varInfo.runtimeAddress);
             }
             else if (tk1.kind == TokenKind::LParen)
             {
-                CallProcedure(tk, false);
+                ASTNode* node = std::move(CallProcedure(tk, false));
                 Match(TokenKind::Semi);
+
+                node = node->CalTypeAndOptimize();
+                node->GenerateCode(code);
             }
         }
         else if (tk.kind == TokenKind::If)
@@ -617,7 +620,7 @@ private:
             {
                 if (procedure.ret)
                 {
-                    ThrowSemantic(tk.filePath, tk.fileLocation, "过程声明需要返回值");
+                    ThrowSemantic(tk.filePath, tk.fileLocation, "过程声明了返回值，但实际没有提供");
                 }
                 GenPopVars();
                 code.emplace_back(ILInstType::OPR, 0, static_cast<int32_t>(ILInstOprType::Ret));
@@ -629,7 +632,7 @@ private:
 
                 if (!procedure.ret)
                 {
-                    ThrowSemantic(tk.filePath, tk.fileLocation, "过程声明没有返回值");
+                    ThrowSemantic(tk.filePath, tk.fileLocation, "过程没有声明返回值");
                 }
 
                 node = node->CalTypeAndOptimize();
