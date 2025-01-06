@@ -494,7 +494,8 @@ private:
                 const VarInfo& varInfo = GetVar(tk, &l);
                 if (node->varType != varInfo.type)
                 {
-                    ThrowSemantic(tk.filePath, tk.fileLocation, "类型不匹配");
+                    ThrowSemantic(tk.filePath, tk.fileLocation, std::string("类型不匹配，将类型") +
+                        to_string(node->varType) + "赋值给类型" + to_string(varInfo.type));
                 }
                 node->GenerateCode(code);
                 SAFE_DELETE(node);
@@ -635,7 +636,8 @@ private:
 
                 if (node->varType != procedure.ret->type)
                 {
-                    ThrowSemantic(tk.filePath, tk.fileLocation, "返回值类型不匹配");
+                    ThrowSemantic(tk.filePath, tk.fileLocation, std::string("返回值类型不匹配，过程声明返回值类型为")
+                        + to_string(procedure.ret->type) + "，实际返回的类型为" + to_string(node->varType));
                 }
                 node->GenerateCode(code);
                 SAFE_DELETE(node);
