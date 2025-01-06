@@ -192,7 +192,7 @@
     <ClInclude Include="PtrHelper.h" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Tests\eval.pl0" />
+    <Content Include="Tests\testeval.pl0" />
     <Content Include="Tests\factorial.pl0" />
     <Content Include="Tests\testfib.pl0" />
     <Content Include="Tests\hello.pas" />
@@ -201,6 +201,7 @@
     <Content Include="Tests\refer_code.il" />
     <Content Include="Tests\refer_code.krr" />
     <Content Include="Tests\testsqrt.pl0" />
+    <Content Include="Tests\test_type_error.pl0" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

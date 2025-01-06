@@ -2,7 +2,7 @@
 <block> -> [<condecl>][<vardecl>][<proc>]<body>
 <condecl> -> const <const>{,<const>};
 <const> -> <id> := <literal>
-<vardecl> -> var <id>:<id>{,<id>:<id>};
+<vardecl> -> var <id>:<type>{,<id>:<type>};
 <proc> -> procedure <id> ([<id>:<id>{,<id>:<id>}]) [: <id>] <block> [<proc>]
 <body> -> begin <statement>{<statement>} end
 <statement> ->  <id> := <exp>;
@@ -20,8 +20,8 @@
             |<CallProcedure>
             |<literal>
             |(<exp>)
-			|i32 (<exp>)
-			|f32 (<exp>)
+			|<type> (<exp>)
+<type> -> i32|f32
 <CallProcedure> -> <id> ([<exp>{,<exp>}])
 <lop> -> =|<>|<|<=|>|>=
 <aop> -> +|-

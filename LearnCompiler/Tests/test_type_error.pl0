@@ -1,0 +1,17 @@
+﻿program TestTypeError; # 测试类型判断
+var f: f32;
+
+    procedure foo(num: i32): f32
+    begin
+        return num; # 返回值类型判断
+        return f32(num) + 1; # 内置运算类型判断
+        return f32(num) + 1.0;
+    end
+
+begin
+    f := 1.5;
+    f := i32(f); # 赋值类型判断
+    foo(f); # 过程传参类型判断
+    f := foo(i32(f));
+    write(f);
+end
