@@ -1,0 +1,10 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\users\\clozy\\source\\repos\\learncompiler\\learncompiler\\ast\\unarynodetype.ixx",
+        "ProvidedModule": "UnaryNodeType",
+        "Includes": [],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

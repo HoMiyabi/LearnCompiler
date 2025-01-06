@@ -29,24 +29,31 @@ import ErrorUtils;
 export class Parser
 {
 private:
+    // 参考类型的Tokenizer对象，用于文本分割和处理
     Tokenizer& tokenizer;
+    
+    // 可能存在的当前处理中的Token对象，用于词法分析
     std::optional<Token> token;
-
+    
+    // 保存过程信息指针的向量，表示当前解析路径上的过程信息
     std::vector<ProcedureInfo*> path;
-
 public:
     std::vector<ILInst> code;
 
-    explicit Parser(Tokenizer& tokenizer):
+// 显式构造函数，初始化解析器
+// 参数 tokenizer: 一个引用，指向词法分析器对象，用于获取和解析标记
+explicit Parser(Tokenizer& tokenizer):
     tokenizer(tokenizer)
     {
     }
 
-    void Parse()
-    {
-        token = tokenizer.GetToken();
-        Prog();
-    }
+// 主要解析函数，负责调用其他函数以解析源代码
+void Parse()
+{
+    // 从词法分析器获取第一个标记，开始解析过程
+    token = tokenizer.GetToken();
+    Prog();
+}
 
 private:
     [[noreturn]]
