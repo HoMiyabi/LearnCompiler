@@ -11,20 +11,20 @@ var l0a: i32;
         end
 
     begin
-        if l0a = 114 then
+        if l0a = 1 then
         begin
-            l0a := 514;
-            l1a := 1919;
+            l0a := 2;
+            l1a := 3;
             l1();
         end
         else
         begin
-            l1a := 810;
+            l1a := 4;
             l2();
         end
     end
 
 begin
-    l0a := 114;
+    l0a := 1;
     l1();
 end

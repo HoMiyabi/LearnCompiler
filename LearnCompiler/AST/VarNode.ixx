@@ -19,6 +19,6 @@ export struct VarNode : ASTNode
 
     void GenerateCode(std::vector<ILInst>& code) override
     {
-        code.emplace_back(ILInstType::LOD, 0, varInfo->runtimeAddress);
+        code.emplace_back(ILInstType::LOD, l, varInfo->runtimeAddress);
     }
 };
