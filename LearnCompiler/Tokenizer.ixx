@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <string>
 
+// 导出模块定义，用于其他模块导入
 export module Tokenizer;
 import FileLocation;
 import Token;
@@ -10,31 +11,35 @@ import CharUtils;
 import TokenKind;
 import ErrorUtils;
 
+// Tokenizer类负责词法分析，将输入文本分解成Token
 export class Tokenizer
 {
 public:
-    std::string filePath;
-    std::string text;
-    std::string::iterator iterator;
-    FileLocation fileLocation;
+    std::string filePath; // 文件路径，用于错误报告
+    std::string text; // 输入文本
+    std::string::iterator iterator; // 当前解析位置的迭代器
+    FileLocation fileLocation; // 当前文件位置，用于跟踪行号和列号
 
 public:
+    // 构造函数，初始化Tokenizer
     explicit Tokenizer(std::string filePath, std::string text):
     filePath(std::move(filePath)), text(std::move(text))
     {
         iterator = this->text.begin();
-        ProcessBOM();
+        ProcessBOM(); // 处理文件开头的BOM
     }
 
+    // 获取下一个Token
     std::optional<Token> GetToken()
     {
-        SkipSpaceComment();
+        SkipSpaceComment(); // 跳过空格和注释
 
         if (IsEnd())
         {
-            return std::nullopt;
+            return std::nullopt; // 如果到达文本末尾，返回空
         }
 
+        // 根据当前字符的类型，调用不同的处理函数
         if (IsLetter(Current()))
         {
             return HandleKeywordOrIdentifier();
@@ -59,10 +64,12 @@ public:
             return HandlePunctuator();
         }
 
+        // 如果当前字符无法识别，抛出异常
         ThrowLexical(filePath, fileLocation, "未定义的字符" + Current());
     }
 
 private:
+    // 跳过空格和注释
     void SkipSpaceComment()
     {
         while (true)
@@ -96,6 +103,7 @@ private:
         }
     }
 
+    // 处理文件开头的BOM
     void ProcessBOM()
     {
         if (text.size() >= 3 && text[0] == '\xEF' && text[1] == '\xBB' && text[2] == '\xBF')
@@ -104,11 +112,13 @@ private:
         }
     }
 
+    // 获取当前字符
     char Current() const
     {
         return *iterator;
     }
 
+    // 移动到下一个字符
     void MoveNext()
     {
         if (IsNewline(*iterator))
@@ -122,11 +132,13 @@ private:
         ++iterator;
     }
 
+    // 检查是否到达文本末尾
     bool IsEnd() const
     {
         return iterator == text.end();
     }
 
+    // 处理关键字或标识符
     Token HandleKeywordOrIdentifier()
     {
         const auto location = fileLocation;
@@ -146,6 +158,7 @@ private:
         return {location, TokenKind::Identifier, std::move(tokenStr), filePath};
     }
 
+    // 处理字面量
     Token HandleLiteral()
     {
         const auto location = fileLocation;
@@ -183,6 +196,7 @@ private:
         }
     }
 
+    // 处理标点符
     Token HandlePunctuator()
     {
         const auto location = fileLocation;
