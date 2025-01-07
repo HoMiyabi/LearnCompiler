@@ -85,28 +85,7 @@
             "c:\\program files\\microsoft visual studio\\2022\\community\\vc\\tools\\msvc\\14.40.33807\\include\\cctype",
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.22621.0\\ucrt\\ctype.h"
         ],
-        "ImportedModules": [
-            {
-                "Name": "FileLocation",
-                "BMI": "C:\\Users\\Clozy\\source\\repos\\LearnCompiler\\LearnCompiler\\x64\\Debug\\FileLocation.ixx.ifc.dt"
-            },
-            {
-                "Name": "Token",
-                "BMI": "C:\\Users\\Clozy\\source\\repos\\LearnCompiler\\LearnCompiler\\x64\\Debug\\Token.ixx.ifc.dt"
-            },
-            {
-                "Name": "CharUtils",
-                "BMI": "C:\\Users\\Clozy\\source\\repos\\LearnCompiler\\LearnCompiler\\x64\\Debug\\CharUtils.ixx.ifc.dt"
-            },
-            {
-                "Name": "TokenKind",
-                "BMI": "C:\\Users\\Clozy\\source\\repos\\LearnCompiler\\LearnCompiler\\x64\\Debug\\TokenKind.ixx.ifc.dt"
-            },
-            {
-                "Name": "ErrorUtils",
-                "BMI": "C:\\Users\\Clozy\\source\\repos\\LearnCompiler\\LearnCompiler\\x64\\Debug\\ErrorUtils.ixx.ifc.dt"
-            }
-        ],
+        "ImportedModules": [],
         "ImportedHeaderUnits": []
     }
 }
