@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     Tokenizer tokenizer(filename, std::move(*text));
     Parser parser(tokenizer);
 
-    // parser.Parse();
+
     try
     {
         parser.Parse();

@@ -1,4 +1,4 @@
-﻿program TestTypeError; # 测试类型判断
+﻿program testType; # 测试类型判断
 var f: f32;
 
     procedure foo(num: i32): f32

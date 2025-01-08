@@ -1,34 +1,42 @@
-﻿<prog> -> program <id>；<block>
-<block> -> [<condecl>][<vardecl>][<proc>]<body>
-<condecl> -> const <const>{,<const>};
-<const> -> <id> := <literal>
-<vardecl> -> var <id>:<type>{,<id>:<type>};
-<proc> -> procedure <id> ([<id>:<id>{,<id>:<id>}]) [: <id>] <block> [<proc>]
-<body> -> begin <statement>{<statement>} end
-<statement> ->  <id> := <exp>;
-               |<CallProcedure>;
-               |if <lexp> then <statement>[else <statement>]
-               |while <lexp> do <statement>
-               |<body>
-               |read (<id>{，<id>});
-               |write (<exp>{, <exp>});
-               |return [<exp>];
-<lexp> -> <exp> <lop> <exp>|odd <exp>
-<exp> -> [+|-]<term>{<aop><term>}
-<term> -> <factor>{<mop><factor>}
-<factor> ->  <id>
-            |<CallProcedure>
-            |<literal>
-            |(<exp>)
-			|<type> (<exp>)
-<type> -> i32|f32
-<CallProcedure> -> <id> ([<exp>{,<exp>}])
-<lop> -> =|<>|<|<=|>|>=
-<aop> -> +|-
-<mop> -> *|/
-<id> -> l{l|d}
-<literal> -> <int32> | <float32>
-<int32> -> [+|-]d{d}
-<float32> -> [+|-]d{d}.d{d}
+﻿<prog> -> <program> <id>; <block>
+<block> -> [<condecl>] [<vardecl>] [<proc>] <body>
 
-l代表字母，d代表数字
+<condecl> -> const <condeclOne> {, <condeclOne>};
+<condeclOne> -> <id> := <literal>
+
+<type> -> i32 | f32
+<idType> -> <id> : <type>
+<vardecl> -> var <idType> {, <idType>};
+
+<proc> -> procedure <id> ( [<idType> {, <idType>}] ) [: <id>] <block> [<proc>]
+
+<body> -> begin <statement> {<statement>} end
+<callProcedure> -> <id> ( [<exp>{, <exp>}] )
+<statement> -> <id> := <exp>;
+            | <callProcedure>;
+            | if <lexp> then <statement> [else <statement>]
+            | while <lexp> do <statement>
+            | <body>
+            | read ( <id>{，<id>} ) ;
+            | write ( <exp>{, <exp>} ) ;
+            | return [<exp>] ;
+
+<lexp> -> <exp> <lop> <exp> | odd <exp>
+<exp> -> [+|-] <term>{<aop> <term>}
+<term> -> <factor>{<mop> <factor>}
+<factor> -> <id>
+         | <callProcedure>
+         | <literal>
+         | ( <exp> )
+         | <type> ( <exp> )
+
+<lop> -> = | <> | < | <= | > | >=
+<aop> -> + | -
+<mop> -> * | /
+
+<id> -> <l>{<l>|<d>}
+<literal> -> <int32> | <float32>
+<int32> -> [+|-] <d>{<d>}
+<float32> -> [+|-] <d>{<d>}.<d>{<d>}
+<l> -> 大写字母和小写字母
+<d> -> 数字0-9
