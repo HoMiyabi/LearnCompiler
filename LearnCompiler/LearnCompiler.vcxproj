@@ -193,13 +193,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tests\testeval.pl0" />
-    <Content Include="Tests\factorial.pl0" />
     <Content Include="Tests\testfib.pl0" />
-    <Content Include="Tests\hello.pas" />
-    <Content Include="Tests\outvar.pl0" />
-    <Content Include="Tests\pl0.txt" />
-    <Content Include="Tests\refer_code.il" />
-    <Content Include="Tests\refer_code.krr" />
+    <Content Include="Tests\test_outvar.pl0" />
     <Content Include="Tests\testsqrt.pl0" />
     <Content Include="Tests\test_type.pl0" />
   </ItemGroup>
