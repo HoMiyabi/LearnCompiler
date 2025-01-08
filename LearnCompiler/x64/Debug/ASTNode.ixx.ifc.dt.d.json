@@ -79,7 +79,16 @@
             "c:\\program files\\microsoft visual studio\\2022\\community\\vc\\tools\\msvc\\14.40.33807\\include\\tuple",
             "c:\\program files\\microsoft visual studio\\2022\\community\\vc\\tools\\msvc\\14.40.33807\\include\\xpolymorphic_allocator.h"
         ],
-        "ImportedModules": [],
+        "ImportedModules": [
+            {
+                "Name": "VarInfo",
+                "BMI": "C:\\Users\\Clozy\\source\\repos\\LearnCompiler\\LearnCompiler\\x64\\Debug\\VarInfo.ixx.ifc.dt"
+            },
+            {
+                "Name": "ILInst",
+                "BMI": "C:\\Users\\Clozy\\source\\repos\\LearnCompiler\\LearnCompiler\\x64\\Debug\\ILInst.ixx.ifc.dt"
+            }
+        ],
         "ImportedHeaderUnits": []
     }
 }

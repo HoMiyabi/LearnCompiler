@@ -4,6 +4,7 @@
 #include <string>
 
 export module CallProcedureNode;
+
 import ASTNode;
 import ProcedureInfo;
 import VarInfo;
@@ -12,14 +13,21 @@ import ILInstType;
 import ErrorUtils;
 import Token;
 
+// CallProcedureNode类继承自ASTNode，表示一个过程调用
 export struct CallProcedureNode : ASTNode
 {
+    // 指向被调用过程的信息
     ProcedureInfo* proc;
+    // 过程调用的层次
     int l;
+    // 过程调用的实际参数列表
     std::vector<ASTNode*> args;
+    // 是否需要返回值
     bool needRet;
+    // 过程调用的令牌信息
     Token token;
 
+    // 构造函数初始化CallProcedureNode对象
     explicit CallProcedureNode(ProcedureInfo* proc, int l, std::vector<ASTNode*> args, bool needRet, Token token):
     ASTNode(proc->ret ? proc->ret->type : VarType::Void),
     proc(proc),
@@ -30,8 +38,10 @@ export struct CallProcedureNode : ASTNode
     {
     }
 
+    // 计算类型并进行优化
     ASTNode* CalTypeAndOptimize() override
     {
+        // 检查参数数量是否匹配
         if (args.size() != proc->params.size())
         {
             ThrowSemantic(token.filePath, token.fileLocation,
@@ -41,11 +51,13 @@ export struct CallProcedureNode : ASTNode
                 "实参有" + std::to_string(args.size()) + "个");
         }
 
+        // 优化每个参数
         for (auto& arg : args)
         {
             arg = arg->CalTypeAndOptimize();
         }
 
+        // 检查参数类型是否匹配
         for (size_t i = 0; i < args.size(); i++)
         {
             if (args[i]->varType != proc->params[i].type)
@@ -60,9 +72,11 @@ export struct CallProcedureNode : ASTNode
         return this;
     }
 
+    // 生成中间语言代码
     void GenerateCode(std::vector<ILInst>& code) override
     {
         int reserveForRet;
+        // 如果过程有返回值，预留空间
         if (proc->ret)
         {
             reserveForRet = 1;
@@ -71,6 +85,7 @@ export struct CallProcedureNode : ASTNode
         else
         {
             reserveForRet = 0;
+            // 如果过程没有返回值，但需要返回值，抛出错误
             if (needRet)
             {
                 ThrowSemantic(token.filePath, token.fileLocation,
@@ -78,13 +93,16 @@ export struct CallProcedureNode : ASTNode
             }
         }
 
+        // 生成每个参数的代码
         for (auto& arg : args)
         {
             arg->GenerateCode(code);
         }
 
+        // 生成调用过程的代码
         code.emplace_back(ILInstType::CAL, l, proc->codeAddress);
 
+        // 根据是否需要返回值，调整栈
         if (needRet)
         {
             if (args.size() != 0)
@@ -101,6 +119,7 @@ export struct CallProcedureNode : ASTNode
         }
     }
 
+    // 析构函数，释放参数列表的内存
     ~CallProcedureNode() override
     {
         for (auto& arg : args)

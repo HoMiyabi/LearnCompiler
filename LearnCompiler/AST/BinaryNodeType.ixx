@@ -2,18 +2,19 @@
 
 export enum class BinaryNodeType
 {
-    Add,
-    Sub,
-    Mul,
-    Div,
-    Eql,
-    Neq,
-    Lss,
-    Leq,
-    Gtr,
+    Add, 
+    Sub, 
+    Mul, 
+    Div, 
+    Eql, 
+    Neq, 
+    Lss, 
+    Leq, 
+    Gtr, 
     Geq,
 };
 
+// 导出一个函数to_string，将BinaryNodeType枚举转换为对应的字符串表示
 export const char* to_string(BinaryNodeType e)
 {
     switch (e)

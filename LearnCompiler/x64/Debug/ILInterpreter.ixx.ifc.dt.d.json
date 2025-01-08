@@ -114,7 +114,20 @@
             "c:\\program files\\microsoft visual studio\\2022\\community\\vc\\tools\\msvc\\14.40.33807\\include\\vector",
             "c:\\program files\\microsoft visual studio\\2022\\community\\vc\\tools\\msvc\\14.40.33807\\include\\__msvc_bit_utils.hpp"
         ],
-        "ImportedModules": [],
+        "ImportedModules": [
+            {
+                "Name": "ILInst",
+                "BMI": "C:\\Users\\Clozy\\source\\repos\\LearnCompiler\\LearnCompiler\\x64\\Debug\\ILInst.ixx.ifc.dt"
+            },
+            {
+                "Name": "ILInstType",
+                "BMI": "C:\\Users\\Clozy\\source\\repos\\LearnCompiler\\LearnCompiler\\x64\\Debug\\ILInstType.ixx.ifc.dt"
+            },
+            {
+                "Name": "ILInstOprType",
+                "BMI": "C:\\Users\\Clozy\\source\\repos\\LearnCompiler\\LearnCompiler\\x64\\Debug\\ILInstOprType.ixx.ifc.dt"
+            }
+        ],
         "ImportedHeaderUnits": []
     }
 }
