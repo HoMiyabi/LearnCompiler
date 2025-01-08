@@ -23,6 +23,6 @@ export struct VarNode : ASTNode
     void GenerateCode(std::vector<ILInst>& code) override
     {
         // 生成LOD指令，用于加载变量的运行时地址到栈中
-        code.emplace_back(ILInstType::LOD, 1, varInfo->runtimeAddress);
+        code.emplace_back(ILInstType::LOD, l, varInfo->runtimeAddress);
     }
 };
