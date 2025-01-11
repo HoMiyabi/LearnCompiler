@@ -1,5 +1,10 @@
 # NUAA PL/0 Compiler
 南航 编译原理课设 PL/0语言
+## 用法
+```text
+>> pl0compiler.exe <filename.pl0>
+```
+
 ## 样例
 ```pascal
 program testsqrt; # 求平方根
@@ -33,7 +38,7 @@ end
 ```
 
 ## 运行
-```
+```text
 =====开始执行=====
 5
 2.23607
@@ -41,7 +46,7 @@ end
 ```
 
 ## 文法
-```
+```text
 <prog> -> <program> <id>; <block>
 <block> -> [<condecl>] [<vardecl>] [<proc>] <body>
 
